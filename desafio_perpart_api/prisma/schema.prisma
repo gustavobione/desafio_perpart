@@ -7,7 +7,37 @@ datasource db {
 }
 
 // ==========================================
-// MODELAGEM DE DADOS
+// ENUMS
+// ==========================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProductStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+}
+
+enum LoanStatus {
+  REQUESTED
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+enum NotificationType {
+  LOAN_REQUEST
+  LOAN_APPROVED
+  LOAN_RETURNED
+  FAVORITE_ALERT
+  SYSTEM
+}
+
+// ==========================================
+// MODELS
 // ==========================================
 
 model User {
@@ -15,51 +45,108 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(USER) // Enum para separar ADMIN e USER comum
+  role      Role     @default(USER)
+  avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relacionamentos 1:N (Usuário cadastra N produtos e N categorias)
-  products   Product[]
+  // 1:N — Usuário cadastra N produtos (jogos)
+  products Product[]
+
+  // 1:N — Usuário cria N categorias
   categories Category[]
 
-  // Relacionamento (Favoritos - N:M)
+  // 1:N — Empréstimos feitos pelo usuário (como locatário)
+  loans Loan[]
+
+  // 1:N — Notificações recebidas
+  notifications Notification[]
+
+  // N:M — Jogos favoritados pelo usuário
   favoriteProducts Product[] @relation("UserFavorites")
+
+  // 1:N — Logs de auditoria
+  auditLogs AuditLog[]
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String?
+  pricePerDay Float
+  status      ProductStatus @default(AVAILABLE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Quem cadastrou o jogo
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  // N:M — Categorias do jogo
+  categories Category[]
+
+  // 1:N — Empréstimos deste jogo
+  loans Loan[]
+
+  // N:M — Quem favoritou
+  favoritedBy User[] @relation("UserFavorites")
 }
 
 model Category {
   id        String   @id @default(uuid())
-  name      String
+  name      String   @unique
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Quem criou a categoria
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
 
-  // Um Produto pode possuir N Categorias (N:M)
+  // N:M — Produtos que possuem esta categoria
   products Product[]
 }
 
-model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  fileUrl     String?  // Para o upload de arquivos exigido no teste
-  createdAt   DateTime @default(now())
+model Loan {
+  id                 String     @id @default(uuid())
+  startDate          DateTime   @default(now())
+  expectedReturnDate DateTime
+  actualReturnDate   DateTime?
+  totalPrice         Float
+  status             LoanStatus @default(REQUESTED)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
-  // Quem criou o produto
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  // Quem está alugando
+  renterId String
+  renter   User   @relation(fields: [renterId], references: [id])
 
-  // Categorias do produto
-  categories Category[]
-
-  // Quem favoritou este produto
-  favoritedBy User[] @relation("UserFavorites")
+  // Qual jogo está sendo alugado
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
 }
 
-enum Role {
-  USER
-  ADMIN
+model Notification {
+  id        String           @id @default(uuid())
+  content   String
+  read      Boolean          @default(false)
+  type      NotificationType @default(SYSTEM)
+  createdAt DateTime         @default(now())
+
+  // Quem recebe a notificação
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, FAVORITE, etc.
+  entity    String   // PRODUCT, USER, CATEGORY, LOAN
+  entityId  String?  // ID do recurso afetado
+  details   Json?    // { old: {...}, new: {...} }
+  createdAt DateTime @default(now())
+
+  // Quem fez a ação
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
