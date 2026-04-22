@@ -47,7 +47,9 @@ export class LoansService {
     }
 
     if (product.status !== ProductStatus.AVAILABLE) {
-      throw new BadRequestException('Este jogo não está disponível para aluguel');
+      throw new BadRequestException(
+        'Este jogo não está disponível para aluguel',
+      );
     }
 
     if (product.ownerId === renterId) {
@@ -89,10 +91,7 @@ export class LoansService {
     });
 
     // Envia em tempo real via WebSocket
-    this.notificationsGateway.sendNotification(
-      product.ownerId,
-      notification,
-    );
+    this.notificationsGateway.sendNotification(product.ownerId, notification);
 
     // Registra no audit log
     await this.auditService.log({
@@ -191,12 +190,16 @@ export class LoansService {
     const loan = await this.findOne(loanId);
 
     if (loan.status !== LoanStatus.REQUESTED) {
-      throw new BadRequestException('Este empréstimo não está pendente de aprovação');
+      throw new BadRequestException(
+        'Este empréstimo não está pendente de aprovação',
+      );
     }
 
     // Apenas o dono do produto ou ADMIN pode aprovar
     if (loan.product.ownerId !== userId && userRole !== Role.ADMIN) {
-      throw new ForbiddenException('Apenas o dono do jogo ou ADMIN pode aprovar');
+      throw new ForbiddenException(
+        'Apenas o dono do jogo ou ADMIN pode aprovar',
+      );
     }
 
     const updated = await this.prisma.loan.update({
@@ -221,10 +224,7 @@ export class LoansService {
       type: NotificationType.LOAN_APPROVED,
     });
 
-    this.notificationsGateway.sendNotification(
-      loan.renter.id,
-      notification,
-    );
+    this.notificationsGateway.sendNotification(loan.renter.id, notification);
 
     await this.auditService.log({
       userId,
@@ -257,7 +257,9 @@ export class LoansService {
       loan.product.ownerId !== userId &&
       userRole !== Role.ADMIN
     ) {
-      throw new ForbiddenException('Sem permissão para registrar esta devolução');
+      throw new ForbiddenException(
+        'Sem permissão para registrar esta devolução',
+      );
     }
 
     const updated = await this.prisma.loan.update({
@@ -307,9 +309,7 @@ export class LoansService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkOverdueLoans() {
-    this.logger.log(
-      'Iniciando verificação de empréstimos atrasados...',
-    );
+    this.logger.log('Iniciando verificação de empréstimos atrasados...');
 
     const now = new Date();
 
