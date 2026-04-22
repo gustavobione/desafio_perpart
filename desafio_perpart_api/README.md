@@ -1,98 +1,87 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🎲 API - Sistema de Aluguel de Jogos de Tabuleiro (PERPART)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📌 Contextualização
+Esta é a API Backend do desafio técnico da PERPART, desenvolvida para gerenciar um sistema completo de aluguel de jogos de tabuleiro físicos. A aplicação foi desenhada com foco em segurança, escalabilidade e adoção das melhores práticas do mercado, como injeção de dependências, arquitetura modular e RBAC (Role-Based Access Control).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🛠️ Tecnologias Utilizadas
+A API foi construída com um ecossistema moderno e performático:
+- **Node.js** com **NestJS**: Framework progressivo para Node.js, garantindo código estruturado.
+- **PostgreSQL**: Banco de dados relacional executado via Docker.
+- **Prisma ORM (v7)**: Modelagem de dados simplificada, tipagem segura (Type-safe) e controle de migrações.
+- **Socket.IO (WebSockets)**: Para o disparo de notificações e alertas em tempo real.
+- **Swagger / OpenAPI**: Documentação automática e interativa de todos os endpoints.
+- **Multer**: Processamento eficiente para upload de mídias nativo do Nest.
 
-## Description
+## 📦 Dependências e Suas Funções
+Para garantir a segurança e robustez, instalamos pacotes específicos:
+- `@nestjs/jwt` e `passport-jwt`: Responsáveis por emitir e validar os tokens JWT, garantindo sessões seguras e stateless.
+- `bcrypt`: Realiza o hash (criptografia irreversível) das senhas dos usuários no banco de dados. Nenhuma senha trafega ou é salva em texto puro.
+- `helmet`: Adiciona cabeçalhos HTTP de segurança para proteger a aplicação contra vulnerabilidades web comuns (XSS, Clickjacking, etc).
+- `@nestjs/throttler`: Implementa o **Rate Limiting** global (limite de 100 requisições/minuto por IP), blindando a API contra ataques de Força Bruta ou DDoS.
+- `@nestjs/schedule` e `cron`: Permitem a execução de tarefas automatizadas em background (cronjobs).
+- `class-validator` e `class-transformer`: Aplicam validação restrita em tempo de execução nos DTOs. Requisições com dados malformados são bloqueadas instantaneamente.
+- `uuid`: Garante a criação de chaves primárias universais e seguras para evitar previsibilidade de dados.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Estrutura de Módulos e Casos de Uso
 
-## Project setup
+A aplicação está dividida nos seguintes módulos lógicos (pastas em `src/`):
 
+1. **Auth & Users**: 
+   - Registro público para clientes (Role `USER`).
+   - Geração de token JWT no Login.
+   - Endpoint `/users/me` para auto-gestão de perfil.
+   - Controle de CRUD estrito por parte de Administradores (Role `ADMIN`).
+
+2. **Products & Categories**:
+   - Criação de catálogo de jogos de tabuleiro.
+   - Sistema dinâmico de **Favoritos** (onde usuários podem guardar os jogos que desejam).
+   - Filtros de query na listagem (`search` por título/descrição, filtros de faixa de preço e paginação total).
+
+3. **Uploads**:
+   - Upload de imagens para o avatar do usuário e para a foto do produto (jogo).
+   - O sistema filtra formatos aceitos (`.png`, `.jpg`, `.webp`) e recusa arquivos maiores que 5MB para proteger o servidor.
+
+4. **Loans (Empréstimos)**:
+   - Um locatário solicita um empréstimo fornecendo apenas a data de devolução desejada.
+   - A API calcula automaticamente o valor total (dias × preço por dia).
+   - O dono do jogo (ou ADMIN) pode aprovar o empréstimo, mudando o status do jogo para `RENTED` (Alugado).
+   - **Cronjob Inteligente**: Diariamente, à meia-noite, um script automatizado verifica se há jogos com a devolução atrasada e muda o status do empréstimo para `OVERDUE`.
+
+5. **Notifications (WebSockets)**:
+   - Quando um jogo é solicitado, aprovado, devolvido ou se atrasa, a API emite eventos por WebSocket, permitindo que a tela do usuário atualize no frontend em tempo real.
+   - Conta também com rotas HTTP para leitura de histórico e "marcar como lida".
+
+6. **Audit (Auditoria Automática)**:
+   - Implementado através de um `Interceptor` Global (`audit.interceptor.ts`).
+   - Qualquer modificação (`POST`, `PATCH`, `PUT`, `DELETE`) nos módulos acima é silenciosamente interceptada e gravada num histórico de logs com o ID de quem executou a ação e os dados modificados. Ideal para rastreabilidade de sistema em nível empresarial.
+
+## ⚙️ Como Executar a API Localmente
+
+### Pré-requisitos
+- Node.js v18 ou superior.
+- Docker e Docker Compose instalados.
+
+### 1. Subir o Banco de Dados (PostgreSQL)
+Na raiz do projeto (onde está o `docker-compose.yml`), rode:
 ```bash
-$ npm install
+docker-compose up -d
 ```
 
-## Compile and run the project
-
+### 2. Instalar as Dependências e Configurar o Prisma
+Na pasta `desafio_perpart_api`:
 ```bash
-# development
-$ npm run start
+npm install
+npx prisma db push
+```
+*(O comando db push sincroniza o schema Prisma gerando as tabelas no seu banco recém criado).*
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+### 3. Rodar a API
+```bash
+# Para rodar em modo de desenvolvimento observando as mudanças:
+npm run start:dev
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 4. Acesso
+- **Endpoint Raiz**: `http://localhost:3000`
+- **Documentação Swagger (Testes Visuais)**: `http://localhost:3000/api`
+- **Prisma Studio (Gerenciador de Banco de Dados)**: Para promover seu usuário a ADMIN, abra outro terminal e digite `npx prisma studio`.
