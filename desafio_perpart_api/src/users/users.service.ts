@@ -1,38 +1,173 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryUserDto } from './dto/query-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Cria um novo usuário (rota exclusiva do ADMIN).
+   * Faz hash da senha e verifica unicidade do email.
+   */
   async create(createUserDto: CreateUserDto) {
+    // Verifica se o email já está em uso
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Este email já está em uso');
+    }
+
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(createUserDto.password, saltOrRounds);
-    
-    return this.prisma.user.create({
+
+    const user = await this.prisma.user.create({
       data: {
         ...createUserDto,
         password: hashedPassword,
       },
     });
+
+    // Nunca retorna a senha no response
+    const { password, ...result } = user;
+    return result;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  /**
+   * Lista todos os usuários com paginação e filtros.
+   * Suporta busca por nome/email e filtro por role.
+   */
+  async findAll(query: QueryUserDto) {
+    const { search, role, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    // Monta filtros dinâmicos
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+          createdAt: true,
+          updatedAt: true,
+          // Não retorna a senha
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  /**
+   * Busca um usuário por ID (UUID).
+   * Lança NotFoundException se não encontrar.
+   */
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatarUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            products: true,
+            categories: true,
+            favoriteProducts: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID "${id}" não encontrado`);
+    }
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  /**
+   * Atualiza um usuário.
+   * Se a senha for alterada, faz o hash novamente.
+   */
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    // Verifica se o usuário existe
+    await this.findOne(id);
+
+    const data: any = { ...updateUserDto };
+
+    // Se estiver atualizando a senha, faz hash
+    if (data.password) {
+      const saltOrRounds = 10;
+      data.password = await bcrypt.hash(data.password, saltOrRounds);
+    }
+
+    // Se estiver atualizando o email, verifica unicidade
+    if (data.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+      if (existingUser && existingUser.id !== id) {
+        throw new ConflictException('Este email já está em uso por outro usuário');
+      }
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data,
+    });
+
+    const { password, ...result } = user;
+    return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  /**
+   * Remove um usuário por ID.
+   */
+  async remove(id: string) {
+    // Verifica se o usuário existe
+    await this.findOne(id);
+
+    await this.prisma.user.delete({ where: { id } });
+
+    return { message: `Usuário com ID "${id}" removido com sucesso` };
   }
 }
