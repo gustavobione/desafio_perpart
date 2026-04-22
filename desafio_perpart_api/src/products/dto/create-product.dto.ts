@@ -1,46 +1,30 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsNumber, IsArray, IsUUID, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
+  @ApiProperty({ example: 'The Witcher: Old World', description: 'Título do jogo de tabuleiro' })
+  @IsString()
+  title: string;
 
-    @ApiProperty({
-        example: "Produto 1",
-        description: "Nome do produto",
-    })
-    name: string;
+  @ApiPropertyOptional({ example: 'Um jogo de RPG cooperativo ambientado no universo de The Witcher.', description: 'Descrição do jogo' })
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @ApiProperty({
-        example: "Produto 1",
-        description: "Descrição do produto",
-    })
-    description: string;
+  @ApiProperty({ example: 25.50, description: 'Preço por dia de aluguel (R$)' })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  pricePerDay: number;
 
-    @ApiProperty({
-        example: 1,
-        description: "Id da categoria",
-    })
-    categoryId: number;
-
-    @ApiProperty({
-        example: 1,
-        description: "Id do usuario",
-    })
-    userId: number;
-
-    @ApiProperty({
-        example: 100,
-        description: "Preço do produto",
-    })
-    price: number;
-
-    @ApiProperty({
-        example: 100,
-        description: "Quantidade do produto",
-    })
-    quantity: number;
-
-    @ApiProperty({
-        example: "ATIVO",
-        description: "Status do produto",
-    })
-    status: string | "ATIVO" | "INATIVO";
+  @ApiPropertyOptional({
+    example: ['uuid-categoria-1', 'uuid-categoria-2'],
+    description: 'IDs (UUIDs) das categorias do jogo',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  categoryIds?: string[];
 }

@@ -1,46 +1,21 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsEnum } from 'class-validator';
+import { ProductStatus } from '@prisma/client';
 
+/**
+ * DTO para atualização de produto.
+ * Herda todos os campos opcionais do CreateProductDto via PartialType.
+ * Adiciona o campo status que só pode ser alterado na atualização.
+ */
 export class UpdateProductDto extends PartialType(CreateProductDto) {
-    @ApiProperty({
-        example: "Produto 1",
-        description: "Nome do produto",
-    })
-    name: string;
-
-    @ApiProperty({
-        example: "Produto 1",
-        description: "Descrição do produto",
-    })
-    description: string;
-
-    @ApiProperty({
-        example: 1,
-        description: "Id da categoria",
-    })
-    categoryId: number;
-
-    @ApiProperty({
-        example: 1,
-        description: "Id do usuario",
-    })
-    userId: number;
-
-    @ApiProperty({
-        example: 100,
-        description: "Preço do produto",
-    })
-    price: number;
-
-    @ApiProperty({
-        example: 100,
-        description: "Quantidade do produto",
-    })
-    quantity: number;
-
-    @ApiProperty({
-        example: "ATIVO",
-        description: "Status do produto",
-    })
-    status: string | "ATIVO" | "INATIVO";
+  @ApiPropertyOptional({
+    example: 'AVAILABLE',
+    description: 'Status do produto',
+    enum: ProductStatus,
+  })
+  @IsOptional()
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 }
