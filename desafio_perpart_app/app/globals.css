@@ -1,26 +1,300 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   UI-GovPE Design Tokens — globals.css
+   Organização: Primitivos → Semânticos (light) → Dark Mode
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVOS — Paleta de cores base
+   Não usar diretamente no código. Usar os tokens semânticos abaixo.
+   -------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Azul claro */
+  --color-light-blue-softest: #e6f3ff;
+  --color-light-blue-softer: #99c6ff;
+  --color-light-blue-soft: #337fff;
+  --color-light-blue-default: #0034b7;
+  --color-light-blue-strong: #001a7a;
+
+  /* Azul escuro */
+  --color-dark-blue-softest: #1357ac;
+  --color-dark-blue-softer: #1249a5;
+  --color-dark-blue-soft: #082947;
+  --color-dark-blue-default: #0b2463;
+  --color-dark-blue-strong: #071442;
+
+  /* Vermelho claro */
+  --color-light-red-softest: #ffe4e4;
+  --color-light-red-softer: #ffc7c7;
+  --color-light-red-soft: #e45f5f;
+  --color-light-red-default: #ac1010;
+  --color-light-red-strong: #841d1d;
+
+  /* Vermelho escuro */
+  --color-dark-red-softest: #e57373;
+  --color-dark-red-softer: #550909;
+  --color-dark-red-soft: #4d0909;
+  --color-dark-red-default: #5e1313;
+  --color-dark-red-strong: #491818;
+
+  /* Verde claro */
+  --color-light-green-softest: #eafbd7;
+  --color-light-green-softer: #d1f8b0;
+  --color-light-green-soft: #86d562;
+  --color-light-green-default: #2b6418;
+  --color-light-green-strong: #12400d;
+
+  /* Verde escuro */
+  --color-dark-green-softest: #6dbc49;
+  --color-dark-green-softer: #49821a;
+  --color-dark-green-soft: #4b7819;
+  --color-dark-green-default: #1c3713;
+  --color-dark-green-strong: #0d230b;
+
+  /* Amarelo claro */
+  --color-light-yellow-softest: #fff6ce;
+  --color-light-yellow-softer: #ffea9d;
+  --color-light-yellow-soft: #ffcd48;
+  --color-light-yellow-default: #ffb60c;
+  --color-light-yellow-strong: #b77706;
+
+  /* Amarelo escuro */
+  --color-dark-yellow-softest: #e0a919;
+  --color-dark-yellow-softer: #a48512;
+  --color-dark-yellow-soft: #927a10;
+  --color-dark-yellow-default: #906a10;
+  --color-dark-yellow-strong: #63440e;
+
+  /* Cinza claro */
+  --color-light-gray-softest: #f8fafc;
+  --color-light-gray-softer: #e7e9eb;
+  --color-light-gray-soft: #ced2d7;
+  --color-light-gray-default: #494c57;
+  --color-light-gray-strong: #28272c;
+
+  /* Cinza escuro */
+  --color-dark-gray-softest: #4a5057;
+  --color-dark-gray-softer: #43484d;
+  --color-dark-gray-soft: #2d2e33;
+  --color-dark-gray-default: #18181a;
+  --color-dark-gray-strong: #0a0f14;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --------------------------------------------------------------------------
+   2. SEMÂNTICOS — Light Mode (padrão)
+   Tokens de significado que os componentes devem usar.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Background */
+  --color-background-default: var(--color-light-gray-softest);
+  --color-background-secondary: var(--color-light-blue-softer);
+  --color-background-darker: var(--color-light-gray-softer);
+  --color-background-dark: var(--color-light-blue-strong);
+  --color-background-feedback-success: var(--color-light-green-softest);
+  --color-background-feedback-danger: var(--color-light-red-softest);
+  --color-background-feedback-warning: var(--color-light-yellow-softest);
+  --color-background-feedback-info: var(--color-light-blue-softest);
+
+  /* Surface */
+  --color-surface-primary-softest: var(--color-light-blue-softest);
+  --color-surface-primary-softer: var(--color-light-blue-softer);
+  --color-surface-primary-soft: var(--color-light-blue-soft);
+  --color-surface-primary-default: var(--color-light-blue-default);
+  --color-surface-primary-strong: var(--color-light-blue-strong);
+  --color-surface-secondary-softest: var(--color-light-gray-softest);
+  --color-surface-secondary-softer: var(--color-light-gray-softer);
+  --color-surface-secondary-soft: var(--color-light-gray-soft);
+  --color-surface-secondary-default: var(--color-light-gray-default);
+  --color-surface-secondary-strong: var(--color-light-gray-strong);
+  --color-surface-danger-softest: var(--color-light-red-softest);
+  --color-surface-danger-softer: var(--color-light-red-softer);
+  --color-surface-danger-soft: var(--color-light-red-soft);
+  --color-surface-danger-default: var(--color-light-red-default);
+  --color-surface-danger-strong: var(--color-light-red-strong);
+
+  /* Text */
+  --color-text-default: var(--color-light-gray-strong);
+  --color-text-primary: var(--color-light-blue-default);
+  --color-text-secondary: var(--color-light-gray-default);
+  --color-text-disabled: var(--color-light-gray-soft);
+  --color-text-bright: var(--color-light-gray-softest);
+  --color-text-link: var(--color-light-blue-default);
+  --color-text-placeholder: var(--color-light-gray-default);
+  --color-text-danger: var(--color-light-red-default);
+  --color-text-success: var(--color-light-green-strong);
+
+  /* Feedback */
+  --color-feedback-success-softest: var(--color-light-green-softest);
+  --color-feedback-success-softer: var(--color-light-green-softer);
+  --color-feedback-success-soft: var(--color-light-green-soft);
+  --color-feedback-success-default: var(--color-light-green-default);
+  --color-feedback-success-strong: var(--color-light-green-strong);
+  --color-feedback-danger-softest: var(--color-light-red-softest);
+  --color-feedback-danger-softer: var(--color-light-red-softer);
+  --color-feedback-danger-soft: var(--color-light-red-soft);
+  --color-feedback-danger-default: var(--color-light-red-default);
+  --color-feedback-danger-strong: var(--color-light-red-strong);
+  --color-feedback-info-softest: var(--color-light-blue-softest);
+  --color-feedback-info-softer: var(--color-light-blue-soft);
+  --color-feedback-info-default: var(--color-light-blue-default);
+  --color-feedback-info-strong: var(--color-light-blue-strong);
+  --color-feedback-warning-softest: var(--color-light-yellow-softest);
+  --color-feedback-warning-softer: var(--color-light-yellow-softer);
+  --color-feedback-warning-soft: var(--color-light-yellow-soft);
+  --color-feedback-warning-default: var(--color-light-yellow-default);
+  --color-feedback-warning-strong: var(--color-light-yellow-strong);
+
+  /* Outline */
+  --color-outline-default: var(--color-light-gray-soft);
+  --color-outline-primary: var(--color-light-blue-default);
+  --color-outline-softest: var(--color-light-gray-softer);
+  --color-outline-disabled: var(--opacity-lightest);
+  --color-outline-strong: var(--color-light-gray-default);
+  --color-outline-success: var(--color-light-green-soft);
+  --color-outline-danger: var(--color-light-red-soft);
+  --color-outline-warning: var(--color-light-yellow-soft);
+  --color-outline-info: var(--color-light-blue-soft);
+
+  /* Elevation */
+  --elevation-low: var(--color-light-gray-softer);
+  --elevation-medium: var(--color-light-gray-soft);
+  --elevation-high: var(--color-light-gray-default);
+
+  /* Opacity */
+  --opacity-lightest: 0.32;
+  --opacity-lighter: 0.56;
+  --opacity-light: 0.72;
+
+  /* Border radius */
+  --outline-radius-ultrasmall: var(--size-4);
+  --outline-radius-small: var(--size-6);
+  --outline-radius-default: var(--size-8);
+  --outline-radius-large: var(--size-16);
+  --outline-radius-full: var(--size-100);
+  --outline-radius-min: var(--size-2);
+
+  /* Border width */
+  --outline-width-hairline: var(--size-1);
+  --outline-width-thin: var(--size-2);
+  --outline-width-thick: var(--size-4);
+
+  /* Spacing */
+  --spacing-2: var(--size-2);
+  --spacing-4: var(--size-4);
+  --spacing-6: var(--size-6);
+  --spacing-8: var(--size-8);
+  --spacing-10: var(--size-10);
+  --spacing-12: var(--size-12);
+  --spacing-16: var(--size-16);
+  --spacing-20: var(--size-20);
+  --spacing-24: var(--size-24);
+  --spacing-32: var(--size-32);
+  --spacing-40: var(--size-40);
+  --spacing-48: var(--size-48);
+  --spacing-56: var(--size-56);
+  --spacing-64: var(--size-64);
+  --spacing-72: var(--size-72);
+  --spacing-80: var(--size-80);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --------------------------------------------------------------------------
+   3. DARK MODE — Sobrescreve tokens semânticos
+   Aplicar a classe `.dark` no elemento <html> ou <body>.
+   -------------------------------------------------------------------------- */
+.dark {
+  /* Background */
+  --color-background-default: var(--color-light-gray-strong);
+  --color-background-secondary: var(--color-dark-blue-softest);
+  --color-background-darker: var(--color-dark-gray-softer);
+  --color-background-dark: var(--color-dark-blue-strong);
+  --color-background-feedback-success: var(--color-dark-green-soft);
+  --color-background-feedback-danger: var(--color-dark-red-soft);
+  --color-background-feedback-warning: var(--color-dark-yellow-soft);
+  --color-background-feedback-info: var(--color-dark-blue-soft);
+
+  /* Surface */
+  --color-surface-primary-softest: var(--color-dark-blue-soft);
+  --color-surface-primary-softer: var(--color-dark-blue-softest);
+  --color-surface-primary-soft: var(--color-dark-blue-softer);
+  --color-surface-primary-default: var(--color-dark-blue-softer);
+  --color-surface-primary-strong: var(--color-dark-blue-strong);
+  --color-surface-secondary-softest: var(--color-light-gray-softest);
+  --color-surface-secondary-softer: var(--color-dark-gray-softer);
+  --color-surface-secondary-soft: var(--color-dark-gray-softest);
+  --color-surface-secondary-default: var(--color-dark-gray-soft);
+  --color-surface-secondary-strong: var(--color-dark-gray-default);
+  --color-surface-danger-softest: var(--color-dark-red-soft);
+  --color-surface-danger-softer: var(--color-dark-red-softer);
+  --color-surface-danger-soft: var(--color-dark-red-softest);
+  --color-surface-danger-default: var(--color-dark-red-default);
+  --color-surface-danger-strong: var(--color-dark-red-strong);
+
+  /* Text */
+  --color-text-default: var(--color-light-gray-softest);
+  --color-text-primary: var(--color-dark-blue-default);
+  --color-text-secondary: var(--color-light-gray-softer);
+  --color-text-disabled: var(--color-dark-gray-softest);
+  --color-text-bright: var(--color-light-gray-softest);
+  --color-text-link: var(--color-light-blue-soft);
+  --color-text-placeholder: var(--color-light-gray-soft);
+  --color-text-danger: var(--color-dark-red-softest);
+  --color-text-success: var(--color-dark-green-softest);
+
+  /* Feedback */
+  --color-feedback-success-softest: var(--color-dark-green-softest);
+  --color-feedback-success-softer: var(--color-dark-green-softer);
+  --color-feedback-success-soft: var(--color-dark-green-soft);
+  --color-feedback-success-default: var(--color-dark-green-default);
+  --color-feedback-success-strong: var(--color-dark-green-strong);
+  --color-feedback-danger-softest: var(--color-dark-red-softest);
+  --color-feedback-danger-softer: var(--color-dark-red-softer);
+  --color-feedback-danger-soft: var(--color-dark-red-soft);
+  --color-feedback-danger-default: var(--color-dark-red-default);
+  --color-feedback-danger-strong: var(--color-dark-red-strong);
+  --color-feedback-info-softest: var(--color-dark-blue-softest);
+  --color-feedback-info-softer: var(--color-dark-blue-soft);
+  --color-feedback-info-default: var(--color-dark-blue-default);
+  --color-feedback-info-strong: var(--color-dark-blue-strong);
+  --color-feedback-warning-softest: var(--color-dark-yellow-softest);
+  --color-feedback-warning-softer: var(--color-dark-yellow-softer);
+  --color-feedback-warning-soft: var(--color-dark-yellow-soft);
+  --color-feedback-warning-default: var(--color-dark-yellow-default);
+  --color-feedback-warning-strong: var(--color-dark-yellow-strong);
+
+  /* Outline */
+  --color-outline-default: var(--color-dark-gray-softest);
+  --color-outline-primary: var(--color-light-blue-soft);
+  --color-outline-softest: var(--color-dark-gray-softer);
+  --color-outline-disabled: var(--opacity-lightest);
+  --color-outline-strong: var(--color-light-gray-softest);
+  --color-outline-success: var(--color-light-green-soft);
+  --color-outline-danger: var(--color-light-red-soft);
+  --color-outline-warning: var(--color-light-yellow-soft);
+  --color-outline-info: var(--color-light-blue-soft);
+
+  /* Elevation */
+  --elevation-low: var(--color-light-gray-default);
+  --elevation-medium: var(--color-light-gray-default);
+  --elevation-high: var(--color-light-gray-default);
+
+  /* Opacity */
+  --opacity-lightest: 0.32;
+  --opacity-lighter: 0.64;
+  --opacity-light: 0.72;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* --------------------------------------------------------------------------
+   4. UTILITÁRIOS — Classes de elevação (box-shadow)
+   -------------------------------------------------------------------------- */
+.elevation-low {
+  box-shadow: 0px 0px 20px 0px var(--elevation-low);
+}
+
+.elevation-medium {
+  box-shadow: 0px 0px 15px 0px var(--elevation-medium);
+}
+
+.elevation-high {
+  box-shadow: 0px 0px 10px 0px var(--elevation-high);
 }
