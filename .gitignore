@@ -1,0 +1,69 @@
+# ==========================================
+# DEPENDÊNCIAS
+# ==========================================
+node_modules/
+/desafio_perpart_api/node_modules/
+/desafio_perpart_app/node_modules/
+
+# ==========================================
+# BUILD E COMPILAÇÃO
+# ==========================================
+# NestJS (Backend)
+dist/
+/desafio_perpart_api/dist/
+
+# Next.js (Frontend - Para amanhã)
+.next/
+out/
+build/
+/desafio_perpart_app/.next/
+
+# ==========================================
+# VARIÁVEIS DE AMBIENTE E SEGURANÇA
+# ==========================================
+# NUNCA suba senhas, tokens JWT ou URLs do banco de dados!
+.env
+.env.*
+!.env.example
+/desafio_perpart_api/.env
+/desafio_perpart_api/.env.*
+!.env.example
+/desafio_perpart_app/.env
+/desafio_perpart_app/.env.*
+!.env.example
+
+# ==========================================
+# DOCKER E BANCO DE DADOS
+# ==========================================
+# Caso você mapeie os dados do Postgres para uma pasta local no docker-compose
+pgdata/
+.docker-data/
+/postgres-data/
+
+# Prisma (ignora banco SQLite local se acabar testando algo)
+*.db
+*.db-journal
+
+# ==========================================
+# LOGS E TESTES
+# ==========================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# ==========================================
+# SISTEMA OPERACIONAL E IDE
+# ==========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
