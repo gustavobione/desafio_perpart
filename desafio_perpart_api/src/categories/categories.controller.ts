@@ -1,6 +1,13 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete,
-  UseGuards, Query,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -9,7 +16,11 @@ import { QueryCategoryDto } from './dto/query-category.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth-guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Categories')
@@ -24,7 +35,10 @@ export class CategoriesController {
    */
   @ApiOperation({ summary: 'Criar nova categoria' })
   @ApiResponse({ status: 201, description: 'Categoria criada com sucesso.' })
-  @ApiResponse({ status: 409, description: 'Categoria com este nome já existe.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Categoria com este nome já existe.',
+  })
   @UseGuards(JwtAuthGuard)
   @Post()
   create(
@@ -38,7 +52,10 @@ export class CategoriesController {
    * Lista todas as categorias com filtros e paginação.
    */
   @ApiOperation({ summary: 'Listar categorias com filtros e paginação' })
-  @ApiResponse({ status: 200, description: 'Lista de categorias retornada.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorias retornada.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: QueryCategoryDto) {
@@ -64,10 +81,16 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Atualizar categoria por ID' })
   @ApiParam({ name: 'id', description: 'UUID da categoria' })
   @ApiResponse({ status: 200, description: 'Categoria atualizada.' })
-  @ApiResponse({ status: 409, description: 'Nome de categoria já existe.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Nome de categoria já existe.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 

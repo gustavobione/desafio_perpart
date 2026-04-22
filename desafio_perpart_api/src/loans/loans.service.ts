@@ -1,16 +1,24 @@
 import {
-  Injectable, NotFoundException, BadRequestException, ForbiddenException,
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { CreateLoanDto } from './dto/create-loan.dto';
-import { UpdateLoanDto } from './dto/update-loan.dto';
 import { QueryLoanDto } from './dto/query-loan.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { AuditService } from '../audit/audit.service';
-import { LoanStatus, ProductStatus, NotificationType, Prisma, Role } from '@prisma/client';
+import {
+  LoanStatus,
+  ProductStatus,
+  NotificationType,
+  Prisma,
+  Role,
+} from '@prisma/client';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class LoansService {
@@ -81,7 +89,10 @@ export class LoansService {
     });
 
     // Envia em tempo real via WebSocket
-    this.notificationsGateway.sendNotification(product.ownerId, notification);
+    this.notificationsGateway.sendNotification(
+      product.ownerId,
+      notification,
+    );
 
     // Registra no audit log
     await this.auditService.log({
@@ -120,7 +131,14 @@ export class LoansService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          product: { select: { id: true, title: true, imageUrl: true, pricePerDay: true } },
+          product: {
+            select: {
+              id: true,
+              title: true,
+              imageUrl: true,
+              pricePerDay: true,
+            },
+          },
           renter: { select: { id: true, name: true, email: true } },
         },
       }),
@@ -129,7 +147,12 @@ export class LoansService {
 
     return {
       data: loans,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -141,7 +164,13 @@ export class LoansService {
       where: { id },
       include: {
         product: {
-          select: { id: true, title: true, imageUrl: true, pricePerDay: true, ownerId: true },
+          select: {
+            id: true,
+            title: true,
+            imageUrl: true,
+            pricePerDay: true,
+            ownerId: true,
+          },
         },
         renter: { select: { id: true, name: true, email: true } },
       },
@@ -192,7 +221,10 @@ export class LoansService {
       type: NotificationType.LOAN_APPROVED,
     });
 
-    this.notificationsGateway.sendNotification(loan.renter.id, notification);
+    this.notificationsGateway.sendNotification(
+      loan.renter.id,
+      notification,
+    );
 
     await this.auditService.log({
       userId,
@@ -212,7 +244,10 @@ export class LoansService {
   async returnGame(loanId: string, userId: string, userRole: Role) {
     const loan = await this.findOne(loanId);
 
-    if (loan.status !== LoanStatus.ACTIVE && loan.status !== LoanStatus.OVERDUE) {
+    if (
+      loan.status !== LoanStatus.ACTIVE &&
+      loan.status !== LoanStatus.OVERDUE
+    ) {
       throw new BadRequestException('Este empréstimo não está ativo');
     }
 
@@ -250,7 +285,10 @@ export class LoansService {
       type: NotificationType.LOAN_RETURNED,
     });
 
-    this.notificationsGateway.sendNotification(loan.product.ownerId, notification);
+    this.notificationsGateway.sendNotification(
+      loan.product.ownerId,
+      notification,
+    );
 
     await this.auditService.log({
       userId,
@@ -269,7 +307,9 @@ export class LoansService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkOverdueLoans() {
-    this.logger.log('Iniciando verificação de empréstimos atrasados...');
+    this.logger.log(
+      'Iniciando verificação de empréstimos atrasados...',
+    );
 
     const now = new Date();
 
@@ -301,7 +341,9 @@ export class LoansService {
       },
     });
 
-    this.logger.log(`Atualizados ${overdueLoans.length} empréstimos para OVERDUE.`);
+    this.logger.log(
+      `Atualizados ${overdueLoans.length} empréstimos para OVERDUE.`,
+    );
 
     // Envia notificações para o dono e para quem alugou
     for (const loan of overdueLoans) {
@@ -311,7 +353,10 @@ export class LoansService {
         content: `Atenção: A devolução do jogo "${loan.product.title}" está atrasada!`,
         type: NotificationType.SYSTEM,
       });
-      this.notificationsGateway.sendNotification(loan.renter.id, renterNotification);
+      this.notificationsGateway.sendNotification(
+        loan.renter.id,
+        renterNotification,
+      );
 
       // Para o dono
       const ownerNotification = await this.notificationsService.create({
@@ -319,7 +364,10 @@ export class LoansService {
         content: `A devolução do seu jogo "${loan.product.title}" por ${loan.renter.name} está atrasada.`,
         type: NotificationType.SYSTEM,
       });
-      this.notificationsGateway.sendNotification(loan.product.ownerId, ownerNotification);
+      this.notificationsGateway.sendNotification(
+        loan.product.ownerId,
+        ownerNotification,
+      );
     }
   }
 }

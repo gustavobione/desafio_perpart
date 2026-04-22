@@ -1,5 +1,7 @@
 import {
-  Injectable, NotFoundException, ForbiddenException,
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -47,7 +49,15 @@ export class ProductsService {
    * Busca por título/descrição, categoria, status, faixa de preço.
    */
   async findAll(query: QueryProductDto) {
-    const { search, categoryId, status, minPrice, maxPrice, page = 1, limit = 10 } = query;
+    const {
+      search,
+      categoryId,
+      status,
+      minPrice,
+      maxPrice,
+      page = 1,
+      limit = 10,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {};
@@ -131,12 +141,19 @@ export class ProductsService {
    * Atualiza um produto.
    * Apenas o dono ou ADMIN podem alterar.
    */
-  async update(id: string, updateProductDto: UpdateProductDto, userId: string, userRole: Role) {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    userId: string,
+    userRole: Role,
+  ) {
     const product = await this.findOne(id);
 
     // Verifica permissão: apenas o dono ou ADMIN
     if (product.owner.id !== userId && userRole !== Role.ADMIN) {
-      throw new ForbiddenException('Você não tem permissão para editar este produto');
+      throw new ForbiddenException(
+        'Você não tem permissão para editar este produto',
+      );
     }
 
     const { categoryIds, ...productData } = updateProductDto;
@@ -169,7 +186,9 @@ export class ProductsService {
     const product = await this.findOne(id);
 
     if (product.owner.id !== userId && userRole !== Role.ADMIN) {
-      throw new ForbiddenException('Você não tem permissão para remover este produto');
+      throw new ForbiddenException(
+        'Você não tem permissão para remover este produto',
+      );
     }
 
     await this.prisma.product.delete({ where: { id } });
@@ -193,12 +212,16 @@ export class ProductsService {
       },
     });
 
-    this.auditService.log({
-      userId,
-      action: 'FAVORITE',
-      entity: 'PRODUCT',
-      entityId: productId,
-    }).catch(err => console.error('Erro ao salvar log de favorite:', err));
+    this.auditService
+      .log({
+        userId,
+        action: 'FAVORITE',
+        entity: 'PRODUCT',
+        entityId: productId,
+      })
+      .catch((err: unknown) =>
+        console.error('Erro ao salvar log de favorite:', err),
+      );
 
     return { message: 'Produto adicionado aos favoritos' };
   }
@@ -218,12 +241,16 @@ export class ProductsService {
       },
     });
 
-    this.auditService.log({
-      userId,
-      action: 'UNFAVORITE',
-      entity: 'PRODUCT',
-      entityId: productId,
-    }).catch(err => console.error('Erro ao salvar log de unfavorite:', err));
+    this.auditService
+      .log({
+        userId,
+        action: 'UNFAVORITE',
+        entity: 'PRODUCT',
+        entityId: productId,
+      })
+      .catch((err: unknown) =>
+        console.error('Erro ao salvar log de unfavorite:', err),
+      );
 
     return { message: 'Produto removido dos favoritos' };
   }

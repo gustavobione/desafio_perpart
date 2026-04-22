@@ -1,7 +1,8 @@
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
+import { Request } from 'express';
 
 /**
  * Tipos de arquivo de imagem permitidos.
@@ -13,7 +14,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
  * Filtro para validar o tipo de arquivo.
  */
 export const imageFileFilter = (
-  req: any,
+  _req: Request,
   file: Express.Multer.File,
   callback: (error: Error | null, acceptFile: boolean) => void,
 ) => {
@@ -37,9 +38,9 @@ export const imageFileFilter = (
  */
 export const multerStorage = diskStorage({
   destination: './uploads',
-  filename: (req, file, callback) => {
+  filename: (_req, file, callback) => {
     const ext = extname(file.originalname).toLowerCase();
-    const filename = `${uuidv4()}${ext}`;
+    const filename = `${randomUUID()}${ext}`;
     callback(null, filename);
   },
 });

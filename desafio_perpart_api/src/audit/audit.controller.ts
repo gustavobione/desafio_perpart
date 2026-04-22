@@ -1,6 +1,4 @@
-import {
-  Controller, Get, UseGuards, Query,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { AuditService } from './audit.service';
 import { QueryAuditDto } from './dto/query-audit.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth-guard';
@@ -8,7 +6,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('Audit')

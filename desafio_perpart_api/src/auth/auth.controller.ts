@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { ValidatedUser } from '../types';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,11 +16,14 @@ export class AuthController {
    */
   @ApiOperation({ summary: 'Login com email e senha' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Login realizado com sucesso. Retorna o token JWT.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login realizado com sucesso. Retorna o token JWT.',
+  })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Request() req) {
+  login(@Request() req: { user: ValidatedUser }) {
     return this.authService.login(req.user);
   }
 
@@ -28,10 +32,13 @@ export class AuthController {
    * Não requer autenticação.
    */
   @ApiOperation({ summary: 'Registrar novo usuário (público)' })
-  @ApiResponse({ status: 201, description: 'Usuário criado com sucesso. Retorna token JWT.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuário criado com sucesso. Retorna token JWT.',
+  })
   @ApiResponse({ status: 409, description: 'Email já está em uso.' })
   @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
+  register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 }

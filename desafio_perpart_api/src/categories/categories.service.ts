@@ -1,5 +1,7 @@
 import {
-  Injectable, NotFoundException, ConflictException,
+  Injectable,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -22,7 +24,9 @@ export class CategoriesService {
     });
 
     if (existing) {
-      throw new ConflictException(`Categoria "${createCategoryDto.name}" já existe`);
+      throw new ConflictException(
+        `Categoria "${createCategoryDto.name}" já existe`,
+      );
     }
 
     return this.prisma.category.create({
@@ -115,7 +119,9 @@ export class CategoriesService {
         where: { name: updateCategoryDto.name },
       });
       if (existing && existing.id !== id) {
-        throw new ConflictException(`Categoria "${updateCategoryDto.name}" já existe`);
+        throw new ConflictException(
+          `Categoria "${updateCategoryDto.name}" já existe`,
+        );
       }
     }
 

@@ -1,4 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
+import { JwtPayload } from '../../types';
 
 /**
  * Decorator para extrair o usuário autenticado da requisição.
@@ -6,8 +8,10 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
  * O user vem do payload do JWT após o JwtStrategy.validate().
  */
 export const CurrentUser = createParamDecorator(
-  (data: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+  (data: keyof JwtPayload | undefined, ctx: ExecutionContext) => {
+    const request = ctx
+      .switchToHttp()
+      .getRequest<Request & { user?: JwtPayload }>();
     const user = request.user;
 
     // Se passar um campo específico, retorna só aquele campo

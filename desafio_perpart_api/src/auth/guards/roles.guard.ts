@@ -1,12 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
+import { Request } from 'express';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { JwtPayload } from '../../types';
 
 /**
  * Guard que verifica se o usuário autenticado possui a role necessária para acessar a rota.
  * Deve ser usado em conjunto com o JwtAuthGuard e o decorator @Roles().
- * 
+ *
  * Exemplo de uso no controller:
  *   @UseGuards(JwtAuthGuard, RolesGuard)
  *   @Roles(Role.ADMIN)
@@ -29,7 +36,9 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context
+      .switchToHttp()
+      .getRequest<Request & { user?: JwtPayload }>();
 
     if (!user) {
       throw new ForbiddenException('Usuário não autenticado');

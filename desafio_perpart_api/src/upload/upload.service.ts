@@ -17,12 +17,11 @@ export class UploadService {
     });
 
     if (!product) {
-      // Remove o arquivo que já foi salvo pelo Multer
       this.removeFile(file.path);
-      throw new NotFoundException(`Produto com ID "${productId}" não encontrado`);
+      throw new NotFoundException(
+        `Produto com ID "${productId}" não encontrado`,
+      );
     }
-
-    // Se já tinha uma imagem anterior, remove do disco
     if (product.imageUrl) {
       this.removeFile(path.join('./uploads', path.basename(product.imageUrl)));
     }

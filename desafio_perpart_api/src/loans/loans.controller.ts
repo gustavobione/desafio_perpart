@@ -1,13 +1,25 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, UseGuards, Query,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { LoansService } from './loans.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { QueryLoanDto } from './dto/query-loan.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth-guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import * as types from '../types';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Loans')
@@ -21,8 +33,14 @@ export class LoansController {
    * Solicita o aluguel de um jogo.
    */
   @ApiOperation({ summary: 'Solicitar aluguel de um jogo' })
-  @ApiResponse({ status: 201, description: 'Solicitação criada. Aguardando aprovação do dono.' })
-  @ApiResponse({ status: 400, description: 'Jogo indisponível ou data inválida.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Solicitação criada. Aguardando aprovação do dono.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Jogo indisponível ou data inválida.',
+  })
   @Post()
   create(
     @Body() createLoanDto: CreateLoanDto,
@@ -35,9 +53,12 @@ export class LoansController {
    * Lista empréstimos (USER vê os seus, ADMIN vê todos).
    */
   @ApiOperation({ summary: 'Listar empréstimos' })
-  @ApiResponse({ status: 200, description: 'Lista de empréstimos retornada.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de empréstimos retornada.',
+  })
   @Get()
-  findAll(@Query() query: QueryLoanDto, @CurrentUser() user: any) {
+  findAll(@Query() query: QueryLoanDto, @CurrentUser() user: types.JwtPayload) {
     return this.loansService.findAll(query, user.userId, user.role);
   }
 
@@ -61,7 +82,7 @@ export class LoansController {
   @ApiResponse({ status: 200, description: 'Empréstimo aprovado.' })
   @ApiResponse({ status: 403, description: 'Sem permissão.' })
   @Patch(':id/approve')
-  approve(@Param('id') id: string, @CurrentUser() user: any) {
+  approve(@Param('id') id: string, @CurrentUser() user: types.JwtPayload) {
     return this.loansService.approve(id, user.userId, user.role);
   }
 
@@ -70,9 +91,12 @@ export class LoansController {
    */
   @ApiOperation({ summary: 'Devolver jogo alugado' })
   @ApiParam({ name: 'id', description: 'UUID do empréstimo' })
-  @ApiResponse({ status: 200, description: 'Devolução registrada. Jogo disponível novamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Devolução registrada. Jogo disponível novamente.',
+  })
   @Patch(':id/return')
-  returnGame(@Param('id') id: string, @CurrentUser() user: any) {
+  returnGame(@Param('id') id: string, @CurrentUser() user: types.JwtPayload) {
     return this.loansService.returnGame(id, user.userId, user.role);
   }
 }

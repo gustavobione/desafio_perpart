@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { AuditLogData } from '../types';
 
 @Injectable()
 export class AuditService {
@@ -10,20 +11,14 @@ export class AuditService {
    * Registra uma ação de auditoria no banco.
    * Chamado por outros services ou pelo interceptor.
    */
-  async log(data: {
-    userId: string;
-    action: string;
-    entity: string;
-    entityId?: string;
-    details?: any;
-  }) {
+  async log(data: AuditLogData) {
     return this.prisma.auditLog.create({
       data: {
-        userId: data.userId,
+        userId: String(data.userId),
         action: data.action,
         entity: data.entity,
-        entityId: data.entityId,
-        details: data.details ?? Prisma.JsonNull,
+        entityId: data.entityId != null ? String(data.entityId) : undefined,
+        details: (data.details as Prisma.InputJsonValue) ?? Prisma.JsonNull,
       },
     });
   }
@@ -41,7 +36,15 @@ export class AuditService {
     page?: number;
     limit?: number;
   }) {
-    const { userId, action, entity, startDate, endDate, page = 1, limit = 20 } = query;
+    const {
+      userId,
+      action,
+      entity,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 20,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.AuditLogWhereInput = {};

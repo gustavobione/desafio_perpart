@@ -1,6 +1,13 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete,
-  UseGuards, Query,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -8,8 +15,13 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth-guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import * as types from '../types';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiQuery,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Products')
@@ -84,9 +96,14 @@ export class ProductsController {
   update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: types.JwtPayload,
   ) {
-    return this.productsService.update(id, updateProductDto, user.userId, user.role);
+    return this.productsService.update(
+      id,
+      updateProductDto,
+      user.userId,
+      user.role,
+    );
   }
 
   /**
@@ -98,7 +115,7 @@ export class ProductsController {
   @ApiResponse({ status: 403, description: 'Sem permissão.' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
+  remove(@Param('id') id: string, @CurrentUser() user: types.JwtPayload) {
     return this.productsService.remove(id, user.userId, user.role);
   }
 
@@ -110,10 +127,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produto favoritado.' })
   @UseGuards(JwtAuthGuard)
   @Post(':id/favorite')
-  favorite(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  favorite(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.productsService.favorite(id, userId);
   }
 
@@ -125,10 +139,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produto desfavoritado.' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id/favorite')
-  unfavorite(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  unfavorite(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.productsService.unfavorite(id, userId);
   }
 }

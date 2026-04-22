@@ -1,5 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max, IsNumber, IsUUID } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+  IsNumber,
+  IsUUID,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '@prisma/client';
 
@@ -8,22 +17,35 @@ import { ProductStatus } from '@prisma/client';
  * Todos os campos são opcionais e usados como query params.
  */
 export class QueryProductDto {
-  @ApiPropertyOptional({ example: 'witcher', description: 'Busca por título ou descrição' })
+  @ApiPropertyOptional({
+    example: 'witcher',
+    description: 'Busca por título ou descrição',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ example: 'uuid-da-categoria', description: 'Filtrar por ID da categoria' })
+  @ApiPropertyOptional({
+    example: 'uuid-da-categoria',
+    description: 'Filtrar por ID da categoria',
+  })
   @IsOptional()
   @IsUUID()
   categoryId?: string;
 
-  @ApiPropertyOptional({ example: 'AVAILABLE', description: 'Filtrar por status', enum: ProductStatus })
+  @ApiPropertyOptional({
+    example: 'AVAILABLE',
+    description: 'Filtrar por status',
+    enum: ProductStatus,
+  })
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
-  @ApiPropertyOptional({ example: 10, description: 'Preço mínimo por dia' })
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Preço mínimo por dia',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -37,14 +59,22 @@ export class QueryProductDto {
   @Min(0)
   maxPrice?: number;
 
-  @ApiPropertyOptional({ example: 1, description: 'Número da página', default: 1 })
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Número da página',
+    default: 1,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 10, description: 'Itens por página', default: 10 })
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Itens por página',
+    default: 10,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

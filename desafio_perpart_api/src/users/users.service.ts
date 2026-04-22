@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
@@ -25,7 +29,10 @@ export class UsersService {
     }
 
     const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltOrRounds,
+    );
 
     const user = await this.prisma.user.create({
       data: {
@@ -35,6 +42,7 @@ export class UsersService {
     });
 
     // Nunca retorna a senha no response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
     return result;
   }
@@ -132,21 +140,23 @@ export class UsersService {
     // Verifica se o usuário existe
     await this.findOne(id);
 
-    const data: any = { ...updateUserDto };
+    const data: Prisma.UserUpdateInput = { ...updateUserDto };
 
     // Se estiver atualizando a senha, faz hash
-    if (data.password) {
+    if (updateUserDto.password) {
       const saltOrRounds = 10;
-      data.password = await bcrypt.hash(data.password, saltOrRounds);
+      data.password = await bcrypt.hash(updateUserDto.password, saltOrRounds);
     }
 
     // Se estiver atualizando o email, verifica unicidade
-    if (data.email) {
+    if (updateUserDto.email) {
       const existingUser = await this.prisma.user.findUnique({
-        where: { email: data.email },
+        where: { email: updateUserDto.email },
       });
       if (existingUser && existingUser.id !== id) {
-        throw new ConflictException('Este email já está em uso por outro usuário');
+        throw new ConflictException(
+          'Este email já está em uso por outro usuário',
+        );
       }
     }
 
@@ -155,6 +165,7 @@ export class UsersService {
       data,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
     return result;
   }

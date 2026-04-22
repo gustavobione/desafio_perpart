@@ -28,11 +28,11 @@ async function bootstrap() {
 
   // Swagger: Documentação da API
   const config = new DocumentBuilder()
-    .setTitle('🎲 API — Aluguel de Jogos de Tabuleiro')
+    .setTitle('API — Aluguel de Jogos de Tabuleiro')
     .setDescription(
       'API RESTful para gerenciamento de aluguel de jogos de tabuleiro físicos. ' +
-      'Sistema completo com autenticação JWT, CRUD de usuários/produtos/categorias, ' +
-      'sistema de empréstimos, favoritos, auditoria e notificações em tempo real.',
+        'Sistema completo com autenticação JWT, CRUD de usuários/produtos/categorias, ' +
+        'sistema de empréstimos, favoritos, auditoria e notificações em tempo real.',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -63,4 +63,4 @@ async function bootstrap() {
   console.log(`🎲 API rodando em http://localhost:${port}`);
   console.log(`📖 Swagger disponível em http://localhost:${port}/api`);
 }
-bootstrap();
+bootstrap().catch((err) => console.error(err));

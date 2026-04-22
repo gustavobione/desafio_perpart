@@ -1,6 +1,10 @@
 import {
-  Controller, Post, Param, UseGuards, UseInterceptors,
-  UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator,
+  Controller,
+  Post,
+  Param,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
@@ -8,8 +12,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt.auth-guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { multerOptions } from './multer.config';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam,
-  ApiConsumes, ApiBody,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 
 @ApiTags('Upload')

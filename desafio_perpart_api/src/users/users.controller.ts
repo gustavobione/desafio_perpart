@@ -1,6 +1,13 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete,
-  UseGuards, Query,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,8 +18,13 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
+import * as types from '../types';
 import {
-  ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam,
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -27,7 +39,10 @@ export class UsersController {
    */
   @ApiOperation({ summary: 'Criar usuário (ADMIN only)' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
-  @ApiResponse({ status: 403, description: 'Acesso negado. Apenas ADMIN.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado. Apenas ADMIN.',
+  })
   @ApiResponse({ status: 409, description: 'Email já está em uso.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -41,7 +56,10 @@ export class UsersController {
    * Qualquer usuário autenticado pode visualizar.
    */
   @ApiOperation({ summary: 'Listar usuários com paginação e filtros' })
-  @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuários retornada com sucesso.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: QueryUserDto) {
@@ -80,14 +98,17 @@ export class UsersController {
    */
   @ApiOperation({ summary: 'Atualizar usuário por ID' })
   @ApiParam({ name: 'id', description: 'UUID do usuário' })
-  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário atualizado com sucesso.',
+  })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @CurrentUser() currentUser: any,
+    @CurrentUser() currentUser: types.JwtPayload,
   ) {
     // Se não for ADMIN e tentar atualizar outro usuário, remove o campo role
     if (currentUser.role !== Role.ADMIN && currentUser.userId !== id) {
@@ -108,8 +129,14 @@ export class UsersController {
    */
   @ApiOperation({ summary: 'Remover usuário (ADMIN only)' })
   @ApiParam({ name: 'id', description: 'UUID do usuário' })
-  @ApiResponse({ status: 200, description: 'Usuário removido com sucesso.' })
-  @ApiResponse({ status: 403, description: 'Acesso negado. Apenas ADMIN.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário removido com sucesso.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado. Apenas ADMIN.',
+  })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)

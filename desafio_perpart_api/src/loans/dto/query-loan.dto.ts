@@ -1,10 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { LoanStatus } from '@prisma/client';
 
 export class QueryLoanDto {
-  @ApiPropertyOptional({ example: 'ACTIVE', description: 'Filtrar por status', enum: LoanStatus })
+  @ApiPropertyOptional({
+    example: 'ACTIVE',
+    description: 'Filtrar por status',
+    enum: LoanStatus,
+  })
   @IsOptional()
   @IsEnum(LoanStatus)
   status?: LoanStatus;

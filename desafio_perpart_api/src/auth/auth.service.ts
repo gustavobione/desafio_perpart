@@ -1,9 +1,10 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import type { ValidatedUser, AuthResponse } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -17,10 +18,14 @@ export class AuthService {
    * Valida as credenciais do usuário no fluxo de login (LocalStrategy).
    * Compara a senha fornecida com o hash armazenado no banco usando bcrypt.
    */
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+  ): Promise<ValidatedUser | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (user && (await bcrypt.compare(pass, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }
@@ -31,16 +36,20 @@ export class AuthService {
    * Gera o token JWT após a validação bem-sucedida do usuário.
    * O payload contém o ID, email e role do usuário.
    */
-  async login(user: any) {
+  login(user: ValidatedUser): AuthResponse {
     const payload = { email: user.email, sub: user.id, role: user.role };
-    
+
     // Log do evento de LOGIN
-    this.auditService.log({
-      userId: user.id,
-      action: 'LOGIN',
-      entity: 'USER',
-      entityId: user.id,
-    }).catch(err => console.error('Erro ao salvar log de login:', err));
+    this.auditService
+      .log({
+        userId: user.id,
+        action: 'LOGIN',
+        entity: 'USER',
+        entityId: user.id,
+      })
+      .catch((err: unknown) =>
+        console.error('Erro ao salvar log de login:', err),
+      );
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -57,7 +66,11 @@ export class AuthService {
    * Registra um novo usuário público (sempre com role USER).
    * A rota POST /auth/register é pública e qualquer pessoa pode se cadastrar.
    */
-  async register(data: { name: string; email: string; password: string }) {
+  async register(data: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<AuthResponse> {
     // Verifica se o email já está em uso
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
@@ -79,6 +92,7 @@ export class AuthService {
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
 
     // Retorna o usuário criado + token JWT para login automático

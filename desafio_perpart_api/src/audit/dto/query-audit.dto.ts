@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min, Max, IsDateString } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryAuditDto {
@@ -8,22 +15,35 @@ export class QueryAuditDto {
   @IsString()
   userId?: string;
 
-  @ApiPropertyOptional({ example: 'CREATE', description: 'Filtrar por ação (CREATE, UPDATE, DELETE, LOGIN, FAVORITE)' })
+  @ApiPropertyOptional({
+    example: 'CREATE',
+    description: 'Filtrar por ação (CREATE, UPDATE, DELETE, LOGIN, FAVORITE)',
+    enum: ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'FAVORITE'],
+  })
   @IsOptional()
   @IsString()
   action?: string;
 
-  @ApiPropertyOptional({ example: 'PRODUCT', description: 'Filtrar por entidade (USER, PRODUCT, CATEGORY, LOAN)' })
+  @ApiPropertyOptional({
+    example: 'PRODUCT',
+    description: 'Filtrar por entidade (USER, PRODUCT, CATEGORY, LOAN)',
+  })
   @IsOptional()
   @IsString()
   entity?: string;
 
-  @ApiPropertyOptional({ example: '2026-01-01', description: 'Data inicial do filtro (ISO 8601)' })
+  @ApiPropertyOptional({
+    example: '2026-01-01',
+    description: 'Data inicial do filtro (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiPropertyOptional({ example: '2026-12-31', description: 'Data final do filtro (ISO 8601)' })
+  @ApiPropertyOptional({
+    example: '2026-12-31',
+    description: 'Data final do filtro (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   endDate?: string;
