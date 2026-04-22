@@ -12,11 +12,12 @@ node_modules/
 dist/
 /desafio_perpart_api/dist/
 
-# Next.js (Frontend - Para amanhã)
+# Next.js (Frontend)
 .next/
 out/
 build/
 /desafio_perpart_app/.next/
+/desafio_perpart_app/next-env.d.ts
 
 # ==========================================
 # VARIÁVEIS DE AMBIENTE E SEGURANÇA
