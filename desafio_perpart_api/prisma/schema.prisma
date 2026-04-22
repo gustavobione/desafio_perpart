@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// MODELAGEM DE DADOS
+// ==========================================
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER) // Enum para separar ADMIN e USER comum
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos 1:N (Usuário cadastra N produtos e N categorias)
+  products   Product[]
+  categories Category[]
+
+  // Relacionamento (Favoritos - N:M)
+  favoriteProducts Product[] @relation("UserFavorites")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  // Quem criou a categoria
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Um Produto pode possuir N Categorias (N:M)
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  fileUrl     String?  // Para o upload de arquivos exigido no teste
+  createdAt   DateTime @default(now())
+
+  // Quem criou o produto
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Categorias do produto
+  categories Category[]
+
+  // Quem favoritou este produto
+  favoritedBy User[] @relation("UserFavorites")
+}
+
+enum Role {
+  USER
+  ADMIN
+}

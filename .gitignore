@@ -42,6 +42,7 @@ pgdata/
 /postgres-data/
 
 # Prisma (ignora banco SQLite local se acabar testando algo)
+/desafio_perpart_api/generated/prisma
 *.db
 *.db-journal
 
