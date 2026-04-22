@@ -1,19 +1,19 @@
 'use client';
 
 import { LayoutProvider } from '@uigovpe/components';
+import { RoleProvider } from '@/context/RoleContext';
 
 /**
  * Layout das rotas protegidas (/(app)).
  *
- * O LayoutProvider com template='backoffice' aplica o layout de sidebar + header
- * do UI-GovPE apenas para as páginas autenticadas.
- *
- * As páginas de login/register ficam no grupo (auth) e NÃO herdam este layout.
+ * - LayoutProvider: aplica o template backoffice (sidebar + header) do UI-GovPE.
+ * - RoleProvider: disponibiliza `useRole()` para todos os componentes filhos,
+ *   permitindo controle fino de permissões (ADMIN vs USER).
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <LayoutProvider breakpoint={900} template="backoffice">
-      {children}
+      <RoleProvider>{children}</RoleProvider>
     </LayoutProvider>
   );
 }

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { UiProvider } from '@uigovpe/components';
+import { GovBar, UiProvider } from '@uigovpe/components';
 import { Inter } from 'next/font/google';
 import '@uigovpe/styles';
 import './globals.css';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,10 +18,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.className} antialiased`}>
         {/*
          * UiProvider: provedor global de temas e contexto do UI-GovPE.
-         * LayoutProvider com template='backoffice' fica no (app)/layout.tsx
-         * para que as páginas de login/register NÃO herdem o layout do backoffice.
+         * ThemeProvider: observa a classe `dark` que o GovBar gerencia.
+         * LayoutProvider com template='backoffice' fica no (app)/layout.tsx.
          */}
-        <UiProvider>{children}</UiProvider>
+        <UiProvider>
+          <ThemeProvider>
+            {/* GovBar: barra do governo com toggle de dark/light mode e tamanho de fonte */}
+            <GovBar/>
+            {children}
+          </ThemeProvider>
+        </UiProvider>
       </body>
     </html>
   );
