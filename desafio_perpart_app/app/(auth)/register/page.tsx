@@ -18,11 +18,13 @@ import {
 
 import { register } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/store/auth.store';
+import { useTheme } from '@/context/ThemeContext';
 import { registerSchema, type RegisterFormData } from '@/infrastructure/validations/register';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
+  const { isDark } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -32,6 +34,7 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -45,7 +48,7 @@ export default function RegisterPage() {
         password: data.password,
       });
       setAuth(response.access_token, response.user);
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         setApiError('Este e-mail já está em uso. Tente com outro.');
@@ -58,98 +61,170 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-md">
-      <Card title="🎲 Criar conta — Ludoboard">
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FlexContainer direction="col" gap="4" justify="center" align="start">
-            <div className="w-full">
-              <Controller
-                name="name"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <InputText
-                    {...field}
-                    label="Nome completo"
-                    placeholder="Seu nome"
-                    invalid={!!errors.name}
-                    supportText={errors.name?.message}
-                  />
-                )}
-              />
-            </div>
+    <div className="flex" style={{ minHeight: 'calc(100vh - 40px)' }}>
+      {/* ── Lado esquerdo: Branding (oculto no mobile) ── */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 gap-6"
+        style={{ backgroundColor: 'var(--color-surface-primary-default)' }}
+      >
+        <span
+          className="material-symbols-outlined select-none"
+          style={{ fontSize: '96px', color: 'var(--color-text-bright)' }}
+        >
+          casino
+        </span>
 
-            <div className="w-full">
-              <Controller
-                name="email"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <InputText
-                    {...field}
-                    label="E-mail"
-                    placeholder="seu@email.com"
-                    invalid={!!errors.email}
-                    supportText={errors.email?.message}
-                  />
-                )}
-              />
-            </div>
+        <div className="text-center">
+          <h1
+            className="text-4xl font-bold"
+            style={{ color: 'var(--color-text-bright)' }}
+          >
+            Ludoboard
+          </h1>
+          <p
+            className="text-lg mt-2"
+            style={{ color: 'var(--color-text-bright)', opacity: 0.8 }}
+          >
+            Aluguel de Jogos de Tabuleiro
+          </p>
+          <p
+            className="text-sm mt-4 max-w-xs mx-auto"
+            style={{ color: 'var(--color-text-bright)', opacity: 0.6 }}
+          >
+            Crie sua conta e comece a explorar nossa coleção de jogos.
+          </p>
+        </div>
+      </div>
 
-            <div className="w-full">
-              <Controller
-                name="password"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <InputPassword
-                    {...field}
-                    label="Senha"
-                    placeholder="Mínimo 6 caracteres"
-                    invalid={!!errors.password}
-                    supportText={errors.password?.message}
-                  />
-                )}
-              />
-            </div>
+      {/* ── Lado direito: Formulário ── */}
+      <div
+        className="flex flex-col items-center justify-center w-full lg:w-1/2 p-4 lg:p-8"
+        style={{ backgroundColor: isDark ? 'var(--color-background-darker)' : 'var(--color-background-default)' }}
+      >
+        {/* Logo visível apenas no mobile */}
+        <div className="lg:hidden mb-8 flex flex-col items-center text-center gap-2">
+          <span
+            className="material-symbols-outlined select-none"
+            style={{ fontSize: '64px', color: 'var(--color-surface-primary-default)' }}
+          >
+            casino
+          </span>
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            Ludoboard
+          </h2>
+        </div>
 
-            <div className="w-full">
-              <Controller
-                name="confirmPassword"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <InputPassword
-                    {...field}
-                    label="Confirmar senha"
-                    placeholder="Repita a senha"
-                    invalid={!!errors.confirmPassword}
-                    supportText={errors.confirmPassword?.message}
-                  />
-                )}
-              />
-            </div>
-
+        <div className="w-full max-w-md">
+          <Card title="Criar conta">
+            {/* Erro da API */}
             {apiError && (
-              <Typography variant="div" size="small" className="text-red-600 w-full">
+              <div
+                className="mb-4 p-3 rounded-md text-sm"
+                style={{
+                  backgroundColor: 'var(--color-background-feedback-danger)',
+                  color: 'var(--color-text-danger)',
+                  border: '1px solid var(--color-outline-danger)',
+                }}
+              >
                 {apiError}
-              </Typography>
+              </div>
             )}
 
-            <Button
-              type="submit"
-              label="Criar conta"
-              className="w-full"
-              loading={isLoading}
-            />
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-4" noValidate>
+              <FlexContainer direction="col" gap="4" justify="center" align="start">
+                <div className="w-full">
+                  <Controller
+                    name="name"
+                    control={control}
+                    render={({ field }) => (
+                      <InputText
+                        {...field}
+                        id="name"
+                        label="Nome completo"
+                        placeholder="Seu nome"
+                        invalid={!!errors.name}
+                        supportText={errors.name?.message}
+                      />
+                    )}
+                  />
+                </div>
 
-            <Typography variant="div" textAlign="center" className="w-full flex-1">
-              {'Já tem uma conta? '}
-              <TextLink onClick={() => router.push('/login')}>Fazer login</TextLink>
-            </Typography>
-          </FlexContainer>
-        </form>
-      </Card>
+                <div className="w-full">
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                      <InputText
+                        {...field}
+                        id="email"
+                        label="E-mail"
+                        placeholder="seu@email.com"
+                        invalid={!!errors.email}
+                        supportText={errors.email?.message}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Controller
+                    name="password"
+                    control={control}
+                    render={({ field }) => (
+                      <InputPassword
+                        {...field}
+                        id="password"
+                        label="Senha"
+                        placeholder="Mínimo 6 caracteres"
+                        invalid={!!errors.password}
+                        supportText={errors.password?.message}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Controller
+                    name="confirmPassword"
+                    control={control}
+                    render={({ field }) => (
+                      <InputPassword
+                        {...field}
+                        id="confirmPassword"
+                        label="Confirmar senha"
+                        placeholder="Repita a senha"
+                        invalid={!!errors.confirmPassword}
+                        supportText={errors.confirmPassword?.message}
+                      />
+                    )}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  label="Criar conta"
+                  className="w-full"
+                  loading={isLoading}
+                />
+
+                <Typography
+                  variant="div"
+                  textAlign="center"
+                  className="w-full"
+                >
+                  {'Já tem uma conta? '}
+                  <TextLink onClick={() => router.push('/login')}>
+                    Fazer login
+                  </TextLink>
+                </Typography>
+              </FlexContainer>
+            </form>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
