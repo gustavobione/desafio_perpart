@@ -3,12 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private auditService: AuditService,
   ) {}
 
   /**
@@ -31,6 +33,15 @@ export class AuthService {
    */
   async login(user: any) {
     const payload = { email: user.email, sub: user.id, role: user.role };
+    
+    // Log do evento de LOGIN
+    this.auditService.log({
+      userId: user.id,
+      action: 'LOGIN',
+      entity: 'USER',
+      entityId: user.id,
+    }).catch(err => console.error('Erro ao salvar log de login:', err));
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {

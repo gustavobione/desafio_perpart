@@ -6,10 +6,14 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, Role } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditService: AuditService,
+  ) {}
 
   /**
    * Cria um novo produto (jogo de tabuleiro).
@@ -189,6 +193,13 @@ export class ProductsService {
       },
     });
 
+    this.auditService.log({
+      userId,
+      action: 'FAVORITE',
+      entity: 'PRODUCT',
+      entityId: productId,
+    }).catch(err => console.error('Erro ao salvar log de favorite:', err));
+
     return { message: 'Produto adicionado aos favoritos' };
   }
 
@@ -206,6 +217,13 @@ export class ProductsService {
         },
       },
     });
+
+    this.auditService.log({
+      userId,
+      action: 'UNFAVORITE',
+      entity: 'PRODUCT',
+      entityId: productId,
+    }).catch(err => console.error('Erro ao salvar log de unfavorite:', err));
 
     return { message: 'Produto removido dos favoritos' };
   }

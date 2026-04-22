@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +14,10 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { UploadModule } from './upload/upload.module';
+import { AuditModule } from './audit/audit.module';
+import { LoansModule } from './loans/loans.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { AuditInterceptor } from './audit/interceptors/audit.interceptor';
 
 @Module({
   imports: [
@@ -28,6 +33,9 @@ import { UploadModule } from './upload/upload.module';
       },
     ]),
 
+    // Agendador de tarefas (Cronjobs)
+    ScheduleModule.forRoot(),
+
     // Servir arquivos estáticos (uploads de imagens)
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
@@ -41,6 +49,9 @@ import { UploadModule } from './upload/upload.module';
     ProductsModule,
     CategoriesModule,
     UploadModule,
+    AuditModule,
+    LoansModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -49,6 +60,11 @@ import { UploadModule } from './upload/upload.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    // Aplica o AuditInterceptor globalmente
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
     },
   ],
 })

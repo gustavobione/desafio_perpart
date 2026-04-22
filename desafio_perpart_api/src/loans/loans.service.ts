@@ -9,6 +9,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { AuditService } from '../audit/audit.service';
 import { LoanStatus, ProductStatus, NotificationType, Prisma, Role } from '@prisma/client';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class LoansService {
@@ -18,6 +20,8 @@ export class LoansService {
     private notificationsGateway: NotificationsGateway,
     private auditService: AuditService,
   ) {}
+
+  private readonly logger = new Logger(LoansService.name);
 
   /**
    * Solicita um empréstimo de um jogo.
@@ -257,5 +261,65 @@ export class LoansService {
     });
 
     return updated;
+  }
+
+  /**
+   * Cronjob diário para verificar empréstimos atrasados (OVERDUE).
+   * Roda todos os dias à meia-noite.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async checkOverdueLoans() {
+    this.logger.log('Iniciando verificação de empréstimos atrasados...');
+
+    const now = new Date();
+
+    const overdueLoans = await this.prisma.loan.findMany({
+      where: {
+        status: LoanStatus.ACTIVE,
+        expectedReturnDate: {
+          lt: now, // se a data de retorno esperada for menor que agora
+        },
+      },
+      include: {
+        product: { select: { title: true, ownerId: true } },
+        renter: { select: { id: true, name: true } },
+      },
+    });
+
+    if (overdueLoans.length === 0) {
+      this.logger.log('Nenhum empréstimo atrasado encontrado.');
+      return;
+    }
+
+    // Atualiza todos para OVERDUE
+    await this.prisma.loan.updateMany({
+      where: {
+        id: { in: overdueLoans.map((l) => l.id) },
+      },
+      data: {
+        status: LoanStatus.OVERDUE,
+      },
+    });
+
+    this.logger.log(`Atualizados ${overdueLoans.length} empréstimos para OVERDUE.`);
+
+    // Envia notificações para o dono e para quem alugou
+    for (const loan of overdueLoans) {
+      // Para o locatário
+      const renterNotification = await this.notificationsService.create({
+        userId: loan.renter.id,
+        content: `Atenção: A devolução do jogo "${loan.product.title}" está atrasada!`,
+        type: NotificationType.SYSTEM,
+      });
+      this.notificationsGateway.sendNotification(loan.renter.id, renterNotification);
+
+      // Para o dono
+      const ownerNotification = await this.notificationsService.create({
+        userId: loan.product.ownerId,
+        content: `A devolução do seu jogo "${loan.product.title}" por ${loan.renter.name} está atrasada.`,
+        type: NotificationType.SYSTEM,
+      });
+      this.notificationsGateway.sendNotification(loan.product.ownerId, ownerNotification);
+    }
   }
 }
