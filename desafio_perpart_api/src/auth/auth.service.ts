@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
@@ -9,15 +9,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // Usado pelo LocalStrategy para validar a senha
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     
-    // IMPORTANTE: Em um cenário real, você usaria bcrypt.compare() aqui.
-    // Para o teste técnico, se o PDF não exigiu hash, você pode comparar em plain text,
-    // mas recomendo instalar o bcrypt e fazer o hash para ganhar pontos!
-    if (user && user.password === pass) {
-      const { password, ...result } = user; // Remove a senha antes de retornar
+    if (user && await bcrypt.compare(pass, user.password)) {
+      const { password, ...result } = user;
       return result;
     }
     return null;
