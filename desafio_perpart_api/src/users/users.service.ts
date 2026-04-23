@@ -16,30 +16,34 @@ import { Prisma } from '@prisma/client';
 export class UsersService implements OnModuleInit {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit() {
     this.logger.log('Checando necessidade de seed do Admin inicial...');
-
-    const adminUsername = process.env.INITIAL_ADMIN_USERNAME;
+    const adminName =
+      process.env.INITIAL_ADMIN_USER ||
+      process.env.INITIAL_ADMIN_NAME ||
+      process.env.INITIAL_ADMIN_USERNAME ||
+      'Super Admin';
+    const adminEmail = process.env.INITIAL_ADMIN_EMAIL;
     const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
 
-    if (!adminUsername || !adminPassword) {
+    if (!adminEmail || !adminPassword) {
       this.logger.warn('Credenciais de ADMIN inicial não fornecidas no .env.');
       return;
     }
 
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: adminUsername },
+      where: { email: adminEmail },
     });
 
     if (existingUser) {
-      if (existingUser.role !== 'ADMIN') {
+      if (existingUser.role !== 'ADMIN' && existingUser.email === adminEmail) {
         this.logger.log(
-          `Usuário ${adminUsername} já existe. Atualizando para ADMIN...`,
+          `Usuário ${adminEmail} já existe. Atualizando para ADMIN...`,
         );
         await this.prisma.user.update({
-          where: { email: adminUsername },
+          where: { email: adminEmail },
           data: { role: 'ADMIN' },
         });
         this.logger.log('Usuário atualizado para ADMIN com sucesso!');
@@ -48,15 +52,15 @@ export class UsersService implements OnModuleInit {
       }
     } else {
       this.logger.log(
-        `Nenhum usuário encontrado com ${adminUsername}. Criando admin...`,
+        `Nenhum usuário encontrado com ${adminEmail}. Criando admin...`,
       );
       const saltOrRounds = 10;
       const hashedPassword = await bcrypt.hash(adminPassword, saltOrRounds);
 
       await this.prisma.user.create({
         data: {
-          name: 'Super Admin',
-          email: adminUsername, // O campo no BD é email, mas usamos o USERNAME do .env
+          name: adminName,
+          email: adminEmail,
           password: hashedPassword,
           role: 'ADMIN',
         },
