@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,8 +13,46 @@ import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(private prisma: PrismaService) {}
+
+  async onModuleInit() {
+    this.logger.log('Checando necessidade de seed do Admin inicial...');
+
+    const adminUsername = process.env.INITIAL_ADMIN_USERNAME;
+    const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+
+    if (!adminUsername || !adminPassword) {
+      this.logger.warn('Credenciais de ADMIN inicial não fornecidas no .env.');
+      return;
+    }
+
+    const adminExists = await this.prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+    });
+
+    if (!adminExists) {
+      this.logger.log(
+        `Nenhum ADMIN encontrado. Criando admin: ${adminUsername}...`,
+      );
+      const saltOrRounds = 10;
+      const hashedPassword = await bcrypt.hash(adminPassword, saltOrRounds);
+
+      await this.prisma.user.create({
+        data: {
+          name: 'Super Admin',
+          email: adminUsername, // O campo no BD é email, mas usamos o USERNAME do .env
+          password: hashedPassword,
+          role: 'ADMIN',
+        },
+      });
+      this.logger.log('ADMIN inicial criado com sucesso!');
+    } else {
+      this.logger.log('O banco de dados já possui um ADMIN. Seed ignorado.');
+    }
+  }
 
   /**
    * Cria um novo usuário (rota exclusiva do ADMIN).
