@@ -11,7 +11,9 @@ import {
   MultiSelect,
   MultiSelectChangeEvent,
   FlexContainer,
-  InputCurrency
+  InputCurrency,
+  Icon,
+  InputTextarea,
 } from "@uigovpe/components";
 import { productsApi } from "@/lib/api/products.api";
 import { categoriesApi } from "@/lib/api/categories.api";
@@ -98,35 +100,44 @@ export default function NewProductPage() {
     setLoading(true);
 
     try {
+      // 1. Cria o produto (sem imagem)
       const createdProduct = await productsApi.create({
         title: formData.title,
-        description: formData.description,
+        description: formData.description || undefined,
         pricePerDay: formData.pricePerDay as number,
-        categoryIds: formData.categoryIds,
-        status: 'AVAILABLE'
+        categoryIds: formData.categoryIds.length > 0 ? formData.categoryIds : undefined,
+        // Nota: status não é enviado — o backend define AVAILABLE por padrão ao criar
       });
 
+      // 2. Se houver imagem, faz upload separado
       if (file) {
-        await uploadApi.uploadProductImage(createdProduct.id, file);
+        try {
+          await uploadApi.uploadProductImage(createdProduct.id, file);
+        } catch (uploadError) {
+          console.error("Erro no upload da imagem:", uploadError);
+          // Produto foi criado, mas upload falhou — avisar sem bloquear
+          showError("Aviso", "Jogo cadastrado, mas houve um erro ao enviar a imagem.", 5000);
+          router.push('/products');
+          return;
+        }
       }
 
-      showSuccess("Sucesso!", "Produto cadastrado com sucesso.", 3000);
+      showSuccess("Sucesso!", "Jogo cadastrado com sucesso.", 3000);
       router.push('/products');
     } catch (error) {
       console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Não foi possível cadastrar o produto.";
+      const errorMessage = error instanceof Error ? error.message : "Não foi possível cadastrar o jogo.";
       showError("Erro", errorMessage, 5000);
     } finally {
       setLoading(false);
     }
   };
 
-
-
   return (
     <FlexContainer direction="col" gap="6" className="w-full animate-fade-in p-4 lg:p-8">
       <Toast ref={toast} />
 
+      {/* Cabeçalho */}
       <div>
         <h1 className="text-4xl font-bold text-[#0034B7] mb-2">
           Cadastrar Jogo
@@ -142,6 +153,7 @@ export default function NewProductPage() {
         </h2>
 
         <FlexContainer direction="col" gap="4" className="w-full">
+          {/* Título */}
           <div>
             <InputText
               label="Título*"
@@ -152,28 +164,31 @@ export default function NewProductPage() {
                 if (errors.title) setErrors({ ...errors, title: '' });
               }}
               invalid={!!errors.title}
+              supportText={errors.title}
               className="w-full"
             />
-            <ErrorMessage message={errors.title} />
           </div>
 
+          {/* Descrição */}
           <div>
-            <InputText
+            <InputTextarea
               label="Descrição"
               placeholder="Descrição do jogo e regras básicas..."
+              rows={5}
               value={formData.description}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                 setFormData({ ...formData, description: e.target.value });
                 if (errors.description) setErrors({ ...errors, description: '' });
               }}
               invalid={!!errors.description}
+              supportText={errors.description}
               className="w-full"
             />
-            <ErrorMessage message={errors.description} />
           </div>
 
-          <FlexContainer direction="row" gap="4" className="w-full mt-6">
-            <div>
+          {/* Preço e Categoria */}
+          <FlexContainer direction="row" gap="4" className="w-full flex-wrap md:flex-nowrap">
+            <div className="w-full md:w-1/2">
               <InputCurrency
                 label="Preço por Dia (R$)*"
                 value={formData.pricePerDay || 0}
@@ -183,37 +198,43 @@ export default function NewProductPage() {
                 }}
                 currency="BRL"
                 locale="pt-BR"
+                minimumFractionDigits={2}
+                maximumFractionDigits={2}
                 invalid={!!errors.pricePerDay}
+                supportText={errors.pricePerDay}
               />
-              <ErrorMessage message={errors.pricePerDay} />
             </div>
 
-            <div>
+            <div className="w-full md:w-1/2">
               <MultiSelect
-                label="Categoria*"
+                label="Categorias"
                 options={categories}
                 optionLabel="name"
                 optionValue="id"
                 value={formData.categoryIds}
                 onChange={(e: MultiSelectChangeEvent) => {
-                  setFormData({ ...formData, categoryIds: e.value });
+                  setFormData({ ...formData, categoryIds: e.value || [] });
                   if (errors.categoryIds) setErrors({ ...errors, categoryIds: '' });
                 }}
                 placeholder="Selecione as categorias"
                 filter
                 showClear
-                className={`w-full ${errors.categoryIds ? 'p-invalid' : ''}`}
+                invalid={!!errors.categoryIds}
+                supportText={errors.categoryIds || "Opcional"}
+                className="w-full"
               />
               <ErrorMessage message={errors.categoryIds} />
             </div>
           </FlexContainer>
 
-          <FlexContainer direction="col" gap="4" className="w-full mt-6">
+          {/* Upload de Imagem */}
+          <div className="w-full mt-2">
             <InputFile
-              label="Capa do Jogo (Opcional)"
+              label="Capa do Jogo"
               placeholder="Escolher arquivo"
               accept="image/*"
-              supportText="Formatos: JPG, PNG. Tamanho máx: 5MB"
+              supportText="Formatos: JPG, PNG, WEBP. Tamanho máx: 5MB. (Opcional)"
+              mode="default"
               onChange={(files) => {
                 if (files && files.length > 0) setFile(files[0]);
                 else setFile(null);
@@ -223,24 +244,27 @@ export default function NewProductPage() {
               invalid={!!errors.imageUrl}
             />
             <ErrorMessage message={errors.imageUrl} />
-          </FlexContainer>
+          </div>
 
-          <FlexContainer direction="row" gap="4" className="w-full mt-6 flex-wrap sm:flex-nowrap">
+          {/* Botões */}
+          <FlexContainer direction="row" gap="4" className="w-full mt-4 flex-wrap sm:flex-nowrap">
             <Button
               label="Cancelar"
+              outlined
               onClick={() => router.back()}
-              className="w-full sm:w-1/2 justify-center p-button-outlined"
+              className="w-full sm:w-1/2"
               disabled={loading}
             />
             <Button
-              label={loading ? "Cadastrando..." : "Cadastrar"}
+              label={loading ? "Cadastrando..." : "Cadastrar Jogo"}
+              icon={<Icon icon="add" outline />}
               onClick={handleRegister}
               loading={loading}
-              className="w-full sm:w-1/2 justify-center bg-[#0034B7] text-white border-none"
+              className="w-full sm:w-1/2"
             />
           </FlexContainer>
         </FlexContainer>
-      </Card>   
+      </Card>
     </FlexContainer>
   );
 }

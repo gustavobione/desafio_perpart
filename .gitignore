@@ -11,6 +11,7 @@ node_modules/
 # NestJS (Backend)
 dist/
 /desafio_perpart_api/dist/
+/desafio_perpart_api/uploads/
 
 # Next.js (Frontend)
 .next/

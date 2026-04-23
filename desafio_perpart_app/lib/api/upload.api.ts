@@ -6,9 +6,11 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append('file', file);
     
+    // NÃO setar Content-Type manualmente: o axios/browser precisa calcular
+    // o `boundary` do multipart automaticamente ao detectar um FormData.
     const response = await api.post(`/upload/product/${productId}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': undefined,
       },
     });
     return response.data;

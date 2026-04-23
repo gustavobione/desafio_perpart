@@ -83,7 +83,7 @@ function AdminDashboard() {
               <ul className="space-y-3">
                 {report.logsByAction.slice(0, 5).map((log, idx) => (
                   <li key={idx} className="flex justify-between items-center text-sm border-b pb-2 last:border-0">
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{log.action}</span>
+                    <span className="font-medium text-gray-700">{log.action}</span>
                     <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{log.count} vezes</span>
                   </li>
                 ))}
@@ -155,9 +155,9 @@ function UserDashboard() {
           ) : loans.length > 0 ? (
             <ul className="space-y-4">
               {loans.map(loan => (
-                <li key={loan.id} className="flex flex-col border p-3 rounded shadow-sm bg-gray-50 dark:bg-gray-800">
+                <li key={loan.id} className="flex flex-col border p-3 rounded shadow-sm bg-gray-50">
                   <span className="font-bold">{loan.product?.title}</span>
-                  <div className="flex justify-between mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex justify-between mt-2 text-sm text-gray-600">
                     <span>Status: <strong className={loan.status === 'OVERDUE' ? 'text-red-500' : 'text-blue-500'}>{loan.status}</strong></span>
                     <span>Retorno: {new Date(loan.expectedReturnDate).toLocaleDateString()}</span>
                   </div>
@@ -186,7 +186,7 @@ function UserDashboard() {
             <ul className="space-y-3">
               {products.map(product => (
                 <li key={product.id} className="flex justify-between items-center border-b pb-2 last:border-0">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">{product.title}</span>
+                  <span className="font-medium text-gray-700">{product.title}</span>
                   <Link href={`/products/${product.id}`} className="ui-btn ui-btn-outline ui-btn-sm">
                     Ver Jogo
                   </Link>
@@ -213,7 +213,7 @@ function KpiCard({ title, value, isError, loading }: { title: string, value?: nu
     content = <span className="text-2xl font-medium animate-pulse text-gray-400">...</span>;
   } else if (isError && value === undefined) {
     content = (
-      <div className="flex items-center gap-2 text-red-600 dark:text-red-400 animate-pulse">
+      <div className="flex items-center gap-2 text-red-600 animate-pulse">
         <Icon icon="error" />
         <span className="text-lg font-bold">Erro</span>
       </div>
@@ -222,7 +222,7 @@ function KpiCard({ title, value, isError, loading }: { title: string, value?: nu
     const displayValue = value ?? 0;
     
     content = (
-      <span className={`text-4xl font-extrabold animate-in fade-in duration-500 ${isError ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+      <span className={`text-4xl font-extrabold animate-in fade-in duration-500 ${isError ? 'text-red-600' : 'text-gray-900'}`}>
         {displayValue}
       </span>
     );
@@ -230,7 +230,7 @@ function KpiCard({ title, value, isError, loading }: { title: string, value?: nu
 
   return (
     <Card
-      title={<span className="text-gray-700 dark:text-yellow-200">{title}</span>}
+      title={<span className="text-gray-700">{title}</span>}
       elevation="low"
       className="h-full flex flex-col justify-between"
     >

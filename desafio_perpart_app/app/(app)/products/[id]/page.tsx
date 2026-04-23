@@ -11,7 +11,7 @@ import {
   Dialog,
   Toast,
   InputText,
-  FlexContainer
+  FlexContainer,
 } from "@uigovpe/components";
 import { productsApi } from "@/lib/api/products.api";
 import { loansApi } from "@/lib/api/loans.api";
@@ -127,14 +127,9 @@ export default function ProductDetailsPage() {
       <Toast ref={toast} />
 
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-[#0034B7] transition-colors">
-            <Icon icon="arrow_back" />
-          </button>
-          <h1 className="text-4xl font-bold text-[#0034B7]">
-            Detalhes do Jogo
-          </h1>
-        </div>
+        <h1 className="text-4xl font-bold text-[#0034B7]">
+          Detalhes do Jogo
+        </h1>
       </div>
 
       <Card className="bg-white border border-gray-200 shadow-lg" elevation="high">
@@ -200,20 +195,19 @@ export default function ProductDetailsPage() {
 
             <FlexContainer direction="row" gap="4" className="w-full pt-6 border-t border-gray-100 flex-wrap sm:flex-nowrap">
               {canEdit && (
-                <Button 
-                  label="Editar Jogo" 
-                  icon={<Icon icon="edit" />} 
+                <Button
+                  label="Editar Jogo"
+                  icon={<Icon icon="edit" outline />}
+                  outlined
                   onClick={() => router.push(`/products/${product.id}/edit`)}
-                  className="w-full sm:w-auto p-button-outlined"
                 />
               )}
 
               {!isOwner && isAvailable && (
-                <Button 
-                  label="Pedir Empréstimo" 
-                  icon={<Icon icon="handshake" />} 
+                <Button
+                  label="Pedir Empréstimo"
+                  icon={<Icon icon="handshake" outline />}
                   onClick={() => setIsLoanModalOpen(true)}
-                  className="w-full sm:w-auto bg-green-600 text-white border-none hover:bg-green-700"
                 />
               )}
             </FlexContainer>
@@ -221,19 +215,20 @@ export default function ProductDetailsPage() {
         </div>
       </Card>
 
-      <Dialog 
-        header="Solicitar Empréstimo" 
-        visible={isLoanModalOpen} 
+      <Dialog
+        header="Solicitar Empréstimo"
+        icon={<Icon icon="handshake" outline />}
+        visible={isLoanModalOpen}
         onHide={() => setIsLoanModalOpen(false)}
-        className="w-[90vw] max-w-md"
+        modal
       >
         <FlexContainer direction="col" gap="4" className="pt-2">
-          <p className="text-gray-600">
-            Você está solicitando o jogo <strong>{product.title}</strong>. 
+          <p className="text-gray-600 m-0">
+            Você está solicitando o jogo <strong>{product.title}</strong>.
             Por favor, informe a data prevista para devolução.
           </p>
 
-          <InputText 
+          <InputText
             label="Data de Devolução*"
             type="date"
             value={expectedReturnDate}
@@ -243,12 +238,15 @@ export default function ProductDetailsPage() {
           />
 
           <FlexContainer direction="row" gap="2" className="justify-end mt-4">
-            <Button label="Cancelar" className="p-button-text" onClick={() => setIsLoanModalOpen(false)} />
-            <Button 
-              label={isRequestingLoan ? "Enviando..." : "Confirmar Solicitação"} 
-              className="bg-[#0034B7] text-white border-none" 
-              onClick={handleRequestLoan} 
-              loading={isRequestingLoan} 
+            <Button
+              label="Cancelar"
+              outlined
+              onClick={() => setIsLoanModalOpen(false)}
+            />
+            <Button
+              label={isRequestingLoan ? "Enviando..." : "Confirmar Solicitação"}
+              onClick={handleRequestLoan}
+              loading={isRequestingLoan}
             />
           </FlexContainer>
         </FlexContainer>
