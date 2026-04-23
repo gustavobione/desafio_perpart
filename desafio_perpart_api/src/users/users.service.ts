@@ -29,13 +29,26 @@ export class UsersService implements OnModuleInit {
       return;
     }
 
-    const adminExists = await this.prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: adminUsername },
     });
 
-    if (!adminExists) {
+    if (existingUser) {
+      if (existingUser.role !== 'ADMIN') {
+        this.logger.log(
+          `Usuário ${adminUsername} já existe. Atualizando para ADMIN...`,
+        );
+        await this.prisma.user.update({
+          where: { email: adminUsername },
+          data: { role: 'ADMIN' },
+        });
+        this.logger.log('Usuário atualizado para ADMIN com sucesso!');
+      } else {
+        this.logger.log('Usuário inicial já é um ADMIN. Seed ignorado.');
+      }
+    } else {
       this.logger.log(
-        `Nenhum ADMIN encontrado. Criando admin: ${adminUsername}...`,
+        `Nenhum usuário encontrado com ${adminUsername}. Criando admin...`,
       );
       const saltOrRounds = 10;
       const hashedPassword = await bcrypt.hash(adminPassword, saltOrRounds);
@@ -49,8 +62,6 @@ export class UsersService implements OnModuleInit {
         },
       });
       this.logger.log('ADMIN inicial criado com sucesso!');
-    } else {
-      this.logger.log('O banco de dados já possui um ADMIN. Seed ignorado.');
     }
   }
 
