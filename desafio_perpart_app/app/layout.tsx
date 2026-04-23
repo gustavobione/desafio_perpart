@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { GovBar, UiProvider } from '@uigovpe/components';
+import { UiProvider } from '@uigovpe/components';
 import { Inter } from 'next/font/google';
 import '@uigovpe/styles';
 import './globals.css';
