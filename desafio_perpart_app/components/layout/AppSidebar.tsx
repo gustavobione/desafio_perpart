@@ -63,6 +63,7 @@ const USER_SECTIONS: SidebarSectionProps[] = [
     icon: 'inventory',
     items: [
       { id: 'products', label: 'Produtos', link: '/products' },
+      { id: 'categories', label: 'Categorias', link: '/categories' },
     ],
   },
   {
