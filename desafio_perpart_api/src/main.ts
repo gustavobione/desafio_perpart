@@ -1,14 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Arquivos estáticos: serve a pasta /uploads como rota pública /uploads/*
+  app.useStaticAssets(path.join(process.cwd(), 'uploads'), {
+    prefix: '/uploads',
+  });
 
   // Segurança: Headers HTTP seguros
-  app.use(helmet());
+  // crossOriginResourcePolicy: 'cross-origin' permite que o frontend (porta 3001)
+  // carregue imagens servidas pela API (porta 3000) sem ser bloqueado pelo browser
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   // Segurança: Validação global de DTOs
   app.useGlobalPipes(
