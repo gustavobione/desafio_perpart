@@ -118,7 +118,7 @@ export function AppSidebar() {
       theme="primary"
       logo={isDark ? LOGO_DARK : LOGO_LIGHT}
       footerSidebarLogo={FOOTER_LOGO}
-      className="[&_.admin-sidebar-logo-box]:bg-transparent dark:bg-neutral-800 dark:[&_span]:text-yellow-200"
+      className="[&_.admin-sidebar-logo-box]:bg-transparent"
     />
   );
 }

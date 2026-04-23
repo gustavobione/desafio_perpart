@@ -11,10 +11,10 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <section className="mb-2">
-        <Typography variant="h1" className="mb-2 dark:text-white">
+        <Typography variant="h1" className="mb-2">
           Bem-vindo(a), {user?.name}!
         </Typography>
-        <Typography variant="p" className="dark:text-gray-300">
+        <Typography variant="p">
           Este é o seu painel de controle do Ludoboard.
         </Typography>
       </section>
@@ -38,7 +38,7 @@ function AdminDashboard() {
           w-full
           flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 mb-2
           md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0 md:mb-6
-          scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600
+          scrollbar-thin scrollbar-thumb-gray-300
       ">
         {kpiList.map((item, index) => (
           <div key={index} className="min-w-[80vw] sm:min-w-[45vw] md:min-w-0 snap-center h-full">
@@ -49,22 +49,22 @@ function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card
-          title={<span className="text-gray-700 dark:text-yellow-200">Últimos Empréstimos</span>}
+          title={<span className="text-gray-700">Últimos Empréstimos</span>}
           elevation="medium"
           className="h-full"
         >
-          <div className="py-4 text-center text-gray-500 dark:text-gray-400">
+          <div className="py-4 text-center text-gray-500">
             Nenhum empréstimo recente.
           </div>
         </Card>
 
         <Card
-          title={<span className="text-gray-700 dark:text-yellow-200">Atividades Recentes</span>}
+          title={<span className="text-gray-700">Atividades Recentes</span>}
           elevation="medium"
           className="h-full"
         >
-          <div className="py-4 text-center text-gray-500 dark:text-gray-400">
-            <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block">
+          <div className="py-4 text-center text-gray-500">
+            <div className="mb-3 p-3 bg-gray-50 rounded-full inline-block">
               <Icon icon="history" />
             </div>
             <p className="text-sm">Nenhuma atividade recente registrada.</p>
@@ -79,20 +79,20 @@ function UserDashboard() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card
-        title={<span className="text-gray-700 dark:text-yellow-200">Meus Empréstimos Atuais</span>}
+        title={<span className="text-gray-700">Meus Empréstimos Atuais</span>}
         elevation="medium"
         className="h-full"
       >
-        <div className="py-4 text-center text-gray-500 dark:text-gray-400">
+        <div className="py-4 text-center text-gray-500">
           Você não possui jogos alugados no momento.
         </div>
       </Card>
       <Card
-        title={<span className="text-gray-700 dark:text-yellow-200">Recomendações</span>}
+        title={<span className="text-gray-700">Recomendações</span>}
         elevation="medium"
         className="h-full"
       >
-        <div className="py-4 text-center text-gray-500 dark:text-gray-400">
+        <div className="py-4 text-center text-gray-500">
           Descubra novos jogos no catálogo!
         </div>
       </Card>

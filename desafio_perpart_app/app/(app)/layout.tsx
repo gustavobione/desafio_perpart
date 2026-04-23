@@ -74,9 +74,9 @@ export default function AppLayoutGroup({ children }: { children: React.ReactNode
         label,
         url: isLast ? undefined : href,
         template: isLast ? (
-          <span className="dark:text-white! font-medium">{label}</span>
+          <span className="font-medium">{label}</span>
         ) : (
-          <Link href={href} className="hover:underline dark:text-yellow-200!">
+          <Link href={href} className="hover:underline">
             {label}
           </Link>
         ),
@@ -89,8 +89,8 @@ export default function AppLayoutGroup({ children }: { children: React.ReactNode
       label: 'Home',
       url: '/dashboard',
       template: (
-        <Link href="/dashboard" className="dark:text-yellow-200! flex items-center">
-          <Icon icon="home" className="dark:text-yellow-200! mr-1" />
+        <Link href="/dashboard" className="flex items-center">
+          <Icon icon="home" className="mr-1" />
         </Link>
       ),
     },
@@ -112,21 +112,12 @@ export default function AppLayoutGroup({ children }: { children: React.ReactNode
                 menuActions={userMenuActions}
                 breadcrumb={breadcrumbData}
                 avatarIcon="person"
-                ui={{
-                  container: {
-                    className:
-                      '[&_.admin-userbar-profile]:!text-[.7rem] dark:!bg-neutral-800 transition-colors duration-300',
-                  },
-                  menuDropdown: {
-                    className: 'dark:!bg-neutral-800 dark:!border dark:!border-white',
-                  },
-                }}
               />
               <AppLayout.MainContent>
                 <AppLayout.BreadCrumbSection>
                   <BreadCrumb home={breadcrumbData.home} model={breadcrumbData.items} />
                 </AppLayout.BreadCrumbSection>
-                <AppLayout.PageContent className="bg-neutral dark:bg-neutral-900! transition-colors duration-300">
+                <AppLayout.PageContent className="transition-colors duration-300">
                   {children}
                 </AppLayout.PageContent>
               </AppLayout.MainContent>
