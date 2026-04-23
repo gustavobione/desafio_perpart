@@ -285,7 +285,18 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. UTILITÁRIOS — Classes de elevação (box-shadow)
+   4. BASE — body & html (conecta variáveis semânticas ao DOM)
+   Sem isso o dark mode troca variáveis, mas a página não reage.
+   -------------------------------------------------------------------------- */
+html,
+body {
+  background-color: var(--color-background-default);
+  color: var(--color-text-default);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   5. UTILITÁRIOS — Classes de elevação (box-shadow)
    -------------------------------------------------------------------------- */
 .elevation-low {
   box-shadow: 0px 0px 20px 0px var(--elevation-low);
@@ -297,4 +308,22 @@
 
 .elevation-high {
   box-shadow: 0px 0px 10px 0px var(--elevation-high);
+}
+
+/* --------------------------------------------------------------------------
+   6. OVERRIDES — Backoffice layout (UI-GovPE)
+   Garante que o content area use os tokens semânticos para dark mode,
+   e que o scroll funcione dentro do layout fixed do backoffice.
+   -------------------------------------------------------------------------- */
+.content-section {
+  background-color: var(--color-background-default);
+  transition: background-color 0.3s ease;
+}
+
+.main-content-backoffice {
+  overflow-y: auto;
+}
+
+.page-content {
+  min-height: 100%;
 }
