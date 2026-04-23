@@ -22,15 +22,29 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 export default function AppLayoutGroup({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, initialize } = useAuthStore();
   const [isMounted, setIsMounted] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => setIsMounted(true), 0);
-    return () => clearTimeout(timeout);
-  }, []);
 
-  if (!isMounted || !user || !isAuthenticated) {
+    initialize().finally(() => {
+      setIsInitializing(false);
+    });
+
+    return () => clearTimeout(timeout);
+  }, [initialize]);
+
+  if (!isMounted || isInitializing) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <span className="text-gray-500">Carregando...</span>
+      </div>
+    );
+  }
+
+  if (!user || !isAuthenticated) {
     return null;
   }
 
