@@ -9,6 +9,7 @@ import {
   AppLayout,
   AdminUserBar,
   BreadCrumb,
+  GovBar,
   Icon,
   type MenuAction,
   type BreadcrumbProps,
@@ -100,6 +101,8 @@ export default function AppLayoutGroup({ children }: { children: React.ReactNode
   return (
     <LayoutProvider breakpoint={900} template="backoffice">
       <RoleProvider>
+        {/* GovBar dentro do LayoutProvider recebe template='backoffice' e fica position:fixed */}
+        <GovBar />
         <AppLayout>
           <AppLayout.MainLayout>
             <AppSidebar />

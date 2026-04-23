@@ -23,8 +23,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
          */}
         <UiProvider>
           <ThemeProvider>
-            {/* GovBar: barra do governo com toggle de dark/light mode e tamanho de fonte */}
-            <GovBar/>
             {children}
           </ThemeProvider>
         </UiProvider>
