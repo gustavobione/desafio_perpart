@@ -98,20 +98,17 @@ export default function NewProductPage() {
     setLoading(true);
 
     try {
-      let imageUrl = null;
-      if (file) {
-        const uploadRes = await uploadApi.uploadFile(file);
-        imageUrl = uploadRes.path;
-      }
-
-      await productsApi.create({
+      const createdProduct = await productsApi.create({
         title: formData.title,
         description: formData.description,
         pricePerDay: formData.pricePerDay as number,
-        imageUrl: imageUrl,
         categoryIds: formData.categoryIds,
         status: 'AVAILABLE'
       });
+
+      if (file) {
+        await uploadApi.uploadProductImage(createdProduct.id, file);
+      }
 
       showSuccess("Sucesso!", "Produto cadastrado com sucesso.", 3000);
       router.push('/products');

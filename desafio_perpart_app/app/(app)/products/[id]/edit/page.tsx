@@ -124,20 +124,16 @@ export default function EditProductPage() {
     setSaving(true);
 
     try {
-      let finalImageUrl = undefined;
-      
-      if (file) {
-        const uploadRes = await uploadApi.uploadFile(file);
-        finalImageUrl = uploadRes.path;
-      }
-
       await productsApi.update(id, {
         title: formData.title,
         description: formData.description,
         pricePerDay: formData.pricePerDay as number,
-        ...(finalImageUrl !== undefined && { imageUrl: finalImageUrl }),
         categoryIds: formData.categoryIds
       });
+
+      if (file) {
+        await uploadApi.uploadProductImage(id, file);
+      }
 
       showSuccess("Sucesso!", "Produto atualizado com sucesso.", 3000);
       router.push('/products');
