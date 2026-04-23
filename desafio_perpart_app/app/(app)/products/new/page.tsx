@@ -8,8 +8,10 @@ import {
   InputFile,
   Button,
   Toast,
-  Dropdown,
-  FlexContainer
+  MultiSelect,
+  MultiSelectChangeEvent,
+  FlexContainer,
+  InputCurrency
 } from "@uigovpe/components";
 import { productsApi } from "@/lib/api/products.api";
 import { categoriesApi } from "@/lib/api/categories.api";
@@ -28,11 +30,16 @@ export default function NewProductPage() {
   const router = useRouter();
   const { toast, showSuccess, showError } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    pricePerDay: number | undefined;
+    categoryIds: string[];
+  }>({
     title: '',
     description: '',
-    pricePerDay: '',
-    categoryId: ''
+    pricePerDay: undefined,
+    categoryIds: []
   });
   const [file, setFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -57,7 +64,7 @@ export default function NewProductPage() {
       productSchema.parse({
         ...formData,
         pricePerDay: formData.pricePerDay || undefined,
-        categoryIds: formData.categoryId ? [formData.categoryId] : []
+        categoryIds: formData.categoryIds
       });
       const newErrors: Record<string, string> = {};
 
@@ -100,9 +107,9 @@ export default function NewProductPage() {
       await productsApi.create({
         title: formData.title,
         description: formData.description,
-        pricePerDay: parseFloat(formData.pricePerDay),
+        pricePerDay: formData.pricePerDay as number,
         imageUrl: imageUrl,
-        categoryIds: [formData.categoryId],
+        categoryIds: formData.categoryIds,
         status: 'AVAILABLE'
       });
 
@@ -170,32 +177,34 @@ export default function NewProductPage() {
 
           <FlexContainer direction="row" gap="4" className="w-full mt-6">
             <div>
-              <InputText
+              <InputCurrency
                 label="Preço por Dia (R$)*"
-                placeholder="Ex: 15.50"
-                value={formData.pricePerDay}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, pricePerDay: e.target.value });
+                value={formData.pricePerDay || 0}
+                onChange={(e: { value: number }) => {
+                  setFormData({ ...formData, pricePerDay: e.value });
                   if (errors.pricePerDay) setErrors({ ...errors, pricePerDay: '' });
                 }}
+                currency="BRL"
+                locale="pt-BR"
                 invalid={!!errors.pricePerDay}
-                className="w-full"
               />
               <ErrorMessage message={errors.pricePerDay} />
             </div>
 
             <div>
-              <Dropdown
+              <MultiSelect
                 label="Categoria*"
                 options={categories}
                 optionLabel="name"
                 optionValue="id"
-                value={formData.categoryId}
-                onChange={(e) => {
-                  setFormData({ ...formData, categoryId: e.value });
+                value={formData.categoryIds}
+                onChange={(e: MultiSelectChangeEvent) => {
+                  setFormData({ ...formData, categoryIds: e.value });
                   if (errors.categoryIds) setErrors({ ...errors, categoryIds: '' });
                 }}
-                placeholder="Selecione a categoria"
+                placeholder="Selecione as categorias"
+                filter
+                showClear
                 className={`w-full ${errors.categoryIds ? 'p-invalid' : ''}`}
               />
               <ErrorMessage message={errors.categoryIds} />

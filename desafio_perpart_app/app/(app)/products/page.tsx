@@ -16,7 +16,9 @@ import {
   DataTableStateEvent,
   Dropdown,
   MenuRef,
-  FlexContainer
+  FlexContainer,
+  MultiSelect,
+  MultiSelectChangeEvent
 } from "@uigovpe/components";
 import { productsApi } from "@/lib/api/products.api";
 import { categoriesApi } from "@/lib/api/categories.api";
@@ -41,7 +43,7 @@ export default function ProductsPage() {
   const [rows, setRows] = useState(ROWS_PER_PAGE_OPTIONS[0]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const menuRef = useRef<MenuRef>(null);
   const [selectedRow, setSelectedRow] = useState<Product | null>(null);
@@ -76,7 +78,7 @@ export default function ProductsPage() {
         limit: rows,
         search: globalFilter || undefined,
         status: selectedStatus || undefined,
-        categoryId: selectedCategory || undefined,
+        categoryId: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
       });
       setProducts(res.data);
       setTotalRecords(res.meta.total);
@@ -85,7 +87,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [first, rows, globalFilter, selectedStatus, selectedCategory]);
+  }, [first, rows, globalFilter, selectedStatus, selectedCategories]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -214,7 +216,7 @@ export default function ProductsPage() {
               />
             </div>
 
-            <div className="w-full md:w-40 lg:w-40">
+            <div className="w-full md:w-40 lg:w-48">
               <Dropdown
                 options={statusOptions}
                 value={selectedStatus}
@@ -224,14 +226,16 @@ export default function ProductsPage() {
               />
             </div>
             
-            <div className="w-full md:w-40 lg:w-40">
-              <Dropdown
-                options={[ { name: 'Todas', id: null }, ...categories ]}
+            <div className="w-full md:w-40 lg:w-48">
+              <MultiSelect
+                options={categories}
                 optionLabel="name"
                 optionValue="id"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.value)}
-                placeholder="Categoria"
+                value={selectedCategories}
+                onChange={(e: MultiSelectChangeEvent) => setSelectedCategories(e.value || [])}
+                placeholder="Categorias"
+                filter
+                showClear
                 className="w-full"
               />
             </div>
