@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import type { User } from '@/types';
+import { usersApi } from '@/lib/api/users.api';
 
 interface AuthState {
   user: User | null;
@@ -14,7 +15,7 @@ interface AuthState {
   logout: () => void;
 
   /** Inicializa o estado a partir do cookie (chamado no layout raiz) */
-  initialize: () => void;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -33,11 +34,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: null, user: null, isAuthenticated: false });
   },
 
-  initialize: () => {
+  initialize: async () => {
     const token = Cookies.get('access_token');
     if (token) {
-      // Token existe: marca como autenticado (o user será carregado sob demanda)
+      // Token existe: marca como autenticado para evitar redirects abruptos
       set({ token, isAuthenticated: true });
+      
+      try {
+        // Busca os dados atualizados do usuário logado
+        const user = await usersApi.getMe();
+        set({ user });
+      } catch (error) {
+        // Se der erro (ex: token inválido/expirado), faz logout
+        console.error('Erro ao buscar perfil:', error);
+        Cookies.remove('access_token');
+        set({ token: null, user: null, isAuthenticated: false });
+      }
     }
   },
 }));
